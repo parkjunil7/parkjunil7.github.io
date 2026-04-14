@@ -644,6 +644,10 @@ body[data-page="details"] .page-header h1 {
   gap: 18px;
 }
 
+.schedule-layout {
+  grid-template-columns: 1.1fr 0.9fr;
+}
+
 .timeline-day {
   display: grid;
   grid-template-columns: 200px 1fr;
@@ -669,6 +673,55 @@ body[data-page="details"] .page-header h1 {
   display: grid;
   gap: 12px;
   margin-top: 16px;
+}
+
+.form-field textarea {
+  width: 100%;
+  min-height: 160px;
+  padding: 14px 16px;
+  border: 1px solid rgba(12, 79, 104, 0.14);
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.9);
+  color: var(--text);
+  font: inherit;
+  resize: vertical;
+}
+
+.form-field textarea:focus {
+  outline: 2px solid rgba(14, 138, 149, 0.2);
+  border-color: rgba(14, 138, 149, 0.4);
+}
+
+.schedule-stats {
+  display: grid;
+  gap: 14px;
+  margin-bottom: 18px;
+}
+
+.schedule-stat {
+  padding: 16px 18px;
+  border: 1px solid rgba(12, 79, 104, 0.12);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.72);
+}
+
+.schedule-stat strong {
+  display: block;
+  margin-top: 8px;
+  font-family: "Space Grotesk", sans-serif;
+  font-size: 1.05rem;
+}
+
+.timeline-body-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.timeline-delete {
+  min-height: 40px;
+  padding: 0 14px;
 }
 
 .detail-stack {
@@ -882,6 +935,7 @@ body[data-page="details"] .page-header h1 {
   .two-column,
   .budget-grid,
   .budget-layout,
+  .schedule-layout,
   .timeline-day,
   .info-grid,
   .detail-columns,

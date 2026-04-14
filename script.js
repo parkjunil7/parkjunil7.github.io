@@ -233,6 +233,210 @@ if (currentPage === "budget") {
   }
 }
 
+if (currentPage === "schedule") {
+  const form = document.getElementById("schedule-form");
+  const listElement = document.getElementById("schedule-list");
+  const countElement = document.getElementById("schedule-count");
+  const firstDateElement = document.getElementById("schedule-first-date");
+  const lastDateElement = document.getElementById("schedule-last-date");
+  const resetButton = document.getElementById("schedule-reset");
+  const setupNotice = document.getElementById("schedule-setup-notice");
+  const supabaseConfig = window.SUPABASE_CONFIG || {};
+  const supabaseUrl = supabaseConfig.url || "";
+  const supabaseAnonKey = supabaseConfig.anonKey || "";
+  let scheduleItems = [];
+  let supabaseClient = null;
+
+  const formatDate = (value) => {
+    const date = new Date(value);
+    const month = `${date.getMonth() + 1}`.padStart(2, "0");
+    const day = `${date.getDate()}`.padStart(2, "0");
+    const weekday = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"][date.getDay()];
+    return `${month}.${day} ${weekday}`;
+  };
+
+  const setLoadingState = (isLoading) => {
+    const submitButton = form?.querySelector("button[type='submit']");
+    if (submitButton) {
+      submitButton.disabled = isLoading;
+    }
+    if (resetButton) {
+      resetButton.disabled = isLoading;
+    }
+  };
+
+  const renderSchedule = () => {
+    countElement.textContent = `${scheduleItems.length}개`;
+
+    if (!scheduleItems.length) {
+      firstDateElement.textContent = "-";
+      lastDateElement.textContent = "-";
+      listElement.innerHTML = "<p class='budget-empty'>등록된 일정이 없습니다. 첫 일정을 추가해보세요.</p>";
+      return;
+    }
+
+    const sortedDates = [...scheduleItems].sort((a, b) => new Date(a.date) - new Date(b.date));
+    firstDateElement.textContent = formatDate(sortedDates[0].date);
+    lastDateElement.textContent = formatDate(sortedDates[sortedDates.length - 1].date);
+
+    listElement.innerHTML = sortedDates
+      .map(
+        (item) => `
+          <article class="timeline-day">
+            <div class="timeline-date">
+              <span>${item.day_label}</span>
+              <strong>${formatDate(item.date)}</strong>
+            </div>
+            <div class="timeline-body">
+              <div class="timeline-body-head">
+                <h2>${item.title}</h2>
+                <button type="button" class="button secondary timeline-delete" data-id="${item.id}">삭제</button>
+              </div>
+              <ul>
+                ${(item.items || [])
+                  .map((entry) => `<li>${entry}</li>`)
+                  .join("")}
+              </ul>
+            </div>
+          </article>
+        `
+      )
+      .join("");
+  };
+
+  const loadSchedule = async () => {
+    if (!supabaseClient) {
+      return;
+    }
+
+    const { data, error } = await supabaseClient
+      .from("itinerary_items")
+      .select("id, date, day_label, title, items, created_at")
+      .order("date", { ascending: true });
+
+    if (error) {
+      listElement.innerHTML = "<p class='budget-empty'>일정을 불러오지 못했습니다. Supabase 테이블 설정을 확인해주세요.</p>";
+      return;
+    }
+
+    scheduleItems = data || [];
+    renderSchedule();
+  };
+
+  form?.addEventListener("submit", (event) => {
+    event.preventDefault();
+
+    if (!supabaseClient || !form) {
+      return;
+    }
+
+    const submit = async () => {
+      const formData = new FormData(form);
+      const date = String(formData.get("date") || "").trim();
+      const dayLabel = String(formData.get("dayLabel") || "").trim();
+      const title = String(formData.get("title") || "").trim();
+      const items = String(formData.get("items") || "")
+        .split("\n")
+        .map((item) => item.trim())
+        .filter(Boolean);
+
+      if (!date || !dayLabel || !title || !items.length) {
+        return;
+      }
+
+      setLoadingState(true);
+      const { error } = await supabaseClient.from("itinerary_items").insert({
+        date,
+        day_label: dayLabel,
+        title,
+        items,
+      });
+      setLoadingState(false);
+
+      if (error) {
+        alert("일정 저장에 실패했습니다. Supabase 테이블 설정을 확인해주세요.");
+        return;
+      }
+
+      form.reset();
+      await loadSchedule();
+    };
+
+    submit();
+  });
+
+  listElement?.addEventListener("click", (event) => {
+    const target = event.target;
+    if (!(target instanceof HTMLElement) || !supabaseClient) {
+      return;
+    }
+
+    const { id } = target.dataset;
+    if (!id) {
+      return;
+    }
+
+    const removeSchedule = async () => {
+      setLoadingState(true);
+      const { error } = await supabaseClient.from("itinerary_items").delete().eq("id", id);
+      setLoadingState(false);
+
+      if (error) {
+        alert("일정 삭제에 실패했습니다.");
+        return;
+      }
+
+      await loadSchedule();
+    };
+
+    removeSchedule();
+  });
+
+  resetButton?.addEventListener("click", () => {
+    if (!supabaseClient) {
+      return;
+    }
+
+    const resetSchedule = async () => {
+      setLoadingState(true);
+      const { error } = await supabaseClient.from("itinerary_items").delete().gte("id", 0);
+      setLoadingState(false);
+
+      if (error) {
+        alert("전체 초기화에 실패했습니다.");
+        return;
+      }
+
+      await loadSchedule();
+    };
+
+    resetSchedule();
+  });
+
+  if (!supabaseUrl || !supabaseAnonKey || !window.supabase?.createClient) {
+    setupNotice?.classList.remove("is-hidden");
+    renderSchedule();
+  } else {
+    supabaseClient = window.supabase.createClient(supabaseUrl, supabaseAnonKey);
+    loadSchedule();
+
+    supabaseClient
+      .channel("public:itinerary_items")
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "itinerary_items",
+        },
+        () => {
+          loadSchedule();
+        }
+      )
+      .subscribe();
+  }
+}
+
 if (currentPage === "home" && window.L) {
   const mapElement = document.getElementById("travel-map");
 
