@@ -8,6 +8,22 @@ const hrefMap = {
   links: "links.html",
 };
 
+const isValidTime = (value) => /^([01]\d|2[0-3]):([0-5]\d)$/.test(value);
+const normalizeTime = (value) => String(value || "").trim();
+const getTimeSortValue = (value) => {
+  const normalized = normalizeTime(value);
+  const [start] = normalized.split("~");
+  return isValidTime(start) ? start : "99:99";
+};
+
+window.addEventListener("error", (event) => {
+  console.error("Unhandled script error", event.error || event.message);
+});
+
+window.addEventListener("unhandledrejection", (event) => {
+  console.error("Unhandled promise rejection", event.reason);
+});
+
 document.querySelectorAll(".nav a").forEach((link) => {
   const target = hrefMap[currentPage];
 
@@ -101,10 +117,6 @@ if (currentPage === "budget") {
       resetButton.disabled = isLoading;
     }
   };
-
-  const isValidTime = (value) => /^([01]\d|2[0-3]):([0-5]\d)$/.test(value);
-
-  const isValidTime = (value) => /^([01]\d|2[0-3]):([0-5]\d)$/.test(value);
 
   const loadExpenses = async () => {
     if (!supabaseClient) {
@@ -280,7 +292,13 @@ if (currentPage === "schedule") {
       return;
     }
 
-    const sortedDates = [...scheduleItems].sort((a, b) => new Date(a.date) - new Date(b.date));
+    const sortedDates = [...scheduleItems].sort((a, b) => {
+      const dateDiff = new Date(a.date) - new Date(b.date);
+      if (dateDiff !== 0) {
+        return dateDiff;
+      }
+      return getTimeSortValue(a.time).localeCompare(getTimeSortValue(b.time));
+    });
     const groupedByDate = sortedDates.reduce((acc, item) => {
       if (!acc[item.date]) {
         acc[item.date] = [];
@@ -358,19 +376,22 @@ if (currentPage === "schedule") {
         .split("\n")
         .map((item) => item.trim())
         .filter(Boolean);
-      const time = startTime && endTime ? `${startTime}~${endTime}` : "";
+      const normalizedStartTime = normalizeTime(startTime);
+      const normalizedEndTime = normalizeTime(endTime);
+      const time = normalizedStartTime && normalizedEndTime ? `${normalizedStartTime}~${normalizedEndTime}` : "";
 
       if (!date || !title || !startTime || !endTime || !items.length) {
+        alert("날짜, 시간, 제목, 내용을 모두 입력해주세요.");
         return;
       }
 
-      if (!isValidTime(startTime) || !isValidTime(endTime)) {
+      if (!isValidTime(normalizedStartTime) || !isValidTime(normalizedEndTime)) {
         alert("시간은 24시간 형식으로 입력해주세요. 예: 07:45");
         return;
       }
 
       setLoadingState(true);
-      const { error } = await supabaseClient.from("itinerary_items").insert({
+        const { error } = await supabaseClient.from("itinerary_items").insert({
         date,
         day_label: getDayLabel(date),
         title,
