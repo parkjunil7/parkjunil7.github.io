@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Travel Share | 홈/개요</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body data-page="home">
+  <div class="site-shell">
+    <header class="topbar">
+      <a class="brand" href="index.html">
+        <span class="brand-mark">J</span>
+        <span>
+          <strong>JIJUN</strong>
+          <small>쿤밍 · 리장 · 샹그릴라 여행</small>
+        </span>
+      </a>
+      <nav class="nav">
+        <a href="index.html">홈/개요</a>
+        <a href="schedule.html">여행 일정표</a>
+        <a href="details.html">날짜별 상세</a>
+        <a href="budget.html">지출</a>
+        <a href="links.html">예약/링크</a>
+      </nav>
+    </header>
+
+    <main>
+      <section class="hero scenic-hero">
+        <div class="hero-copy">
+          <p class="eyebrow">Yunnan China · 2026</p>
+          <h1>하늘과 설산 사이,<br>윈난으로</h1>
+          <p class="hero-text">
+            4월 30일부터 5월 6일까지, 쿤밍에서 시작해 리장과 샹그릴라로 이어지는 여행의 순간을
+            한곳에 담았습니다.
+          </p>
+          <div class="hero-actions">
+            <a class="button primary" href="schedule.html">일정표 보기</a>
+            <a class="button secondary" href="details.html">상세 계획 보기</a>
+          </div>
+          <div class="hero-badges">
+            <span class="pill">4.30 - 5.06</span>
+            <span class="pill">Kunming</span>
+            <span class="pill">Lijiang</span>
+            <span class="pill">Shangri-La</span>
+          </div>
+        </div>
+
+        <div class="hero-visual">
+          <article class="photo-card photo-card-main">
+            <div class="photo-card-label">
+              <span>대표 풍경</span>
+              <strong>리장 · 옥룡설산 무드</strong>
+            </div>
+          </article>
+          <article class="photo-card photo-card-side">
+            <div class="photo-card-label">
+              <span>스테이 뷰</span>
+              <strong>산맥과 구름이 보이는 숙소 감성</strong>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <section class="overview-strip">
+        <article class="overview-card">
+          <span class="label">여행 기간</span>
+          <strong>2026.04.30 Thu - 2026.05.06 Wed</strong>
+        </article>
+        <article class="overview-card">
+          <span class="label">여행 도시</span>
+          <strong>쿤밍 · 리장 · 샹그릴라</strong>
+        </article>
+        <article class="overview-card">
+          <span class="label">여행 테마</span>
+          <strong>별빛 · 설산 · 힐링</strong>
+        </article>
+      </section>
+
+      <section class="panel accent route-panel map-panel">
+        <div class="panel-head">
+          <p class="eyebrow">Route Map</p>
+          <h2>이동 경로</h2>
+        </div>
+        <div id="travel-map" class="travel-map" aria-label="인천공항에서 쿤밍, 리장, 샹그릴라로 이어지는 여행 경로 지도"></div>
+        <p class="route-caption">인천공항에서 출발해 쿤밍, 리장, 샹그릴라까지 이어지는 이동 동선을 실제 지도 위에서 확인할 수 있습니다.</p>
+        <div class="route-summary">
+          <article class="route-summary-card">
+            <span class="route-summary-kind">항공</span>
+            <strong>인천공항 → 쿤밍</strong>
+            <p>예상 4시간 5분</p>
+          </article>
+          <article class="route-summary-card">
+            <span class="route-summary-kind">기차</span>
+            <strong>쿤밍 → 리장</strong>
+            <p>예상 4시간</p>
+          </article>
+          <article class="route-summary-card">
+            <span class="route-summary-kind">차량</span>
+            <strong>리장 → 샹그릴라</strong>
+            <p>예상 2시간</p>
+          </article>
+        </div>
+      </section>
+
+      <section class="panel destinations-panel">
+        <div class="panel-head">
+          <p class="eyebrow">Destinations</p>
+          <h2>도시별 무드</h2>
+        </div>
+        <div class="feature-grid">
+          <article class="feature-card destination-card">
+            <span class="city-tag">Kunming</span>
+            <h3>쿤밍</h3>
+            <p>여행의 시작점. 비교적 온화한 날씨와 도착 후 동선 정리에 좋은 도시입니다.</p>
+          </article>
+          <article class="feature-card destination-card">
+            <span class="city-tag">Lijiang</span>
+            <h3>리장</h3>
+            <p>설산과 호수, 고성이 함께 어우러지는 핵심 하이라이트 지역입니다.</p>
+          </article>
+          <article class="feature-card destination-card">
+            <span class="city-tag">Shangri-La</span>
+            <h3>샹그릴라</h3>
+            <p>고지대의 시원한 공기와 넓은 풍경, 느긋한 체류 감성이 매력적인 곳입니다.</p>
+          </article>
+        </div>
+      </section>
+
+      <section class="panel">
+        <div class="panel-head">
+          <p class="eyebrow">Quick Access</p>
+          <h2>페이지 바로가기</h2>
+        </div>
+        <div class="feature-grid">
+          <a class="feature-card" href="schedule.html">
+            <h3>여행 일정표</h3>
+            <p>날짜 순서대로 전체 흐름을 빠르게 확인합니다.</p>
+          </a>
+          <a class="feature-card" href="details.html">
+            <h3>날짜별 상세</h3>
+            <p>장소, 식당, 숙소, 메모를 날짜별로 정리합니다.</p>
+          </a>
+          <a class="feature-card" href="budget.html">
+            <h3>지출</h3>
+            <p>총 지출을 한눈에 확인합니다.</p>
+          </a>
+          <a class="feature-card" href="links.html">
+            <h3>예약/링크</h3>
+            <p>항공, 숙소, 지도, 예약 페이지 링크를 모아둡니다.</p>
+          </a>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+  <script src="script.js"></script>
+</body>
+</html>

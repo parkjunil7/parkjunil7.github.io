@@ -1,0 +1,51 @@
+<svg width="900" height="900" viewBox="0 0 900 900" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="900" height="900" fill="url(#sky2)"/>
+  <path d="M0 532C90 480 154 462 238 468C324 474 418 510 510 500C626 488 754 400 900 356V0H0V532Z" fill="url(#mist)" fill-opacity="0.48"/>
+  <path d="M0 610L128 486L220 530L318 424L414 516L526 362L638 510L718 406L810 476L900 430V900H0V610Z" fill="url(#rangeBack)"/>
+  <path d="M0 690L108 598L210 644L298 556L406 650L506 520L614 640L714 548L812 624L900 590V900H0V690Z" fill="url(#rangeFront)"/>
+  <path d="M520 362L568 414L612 388L638 510L718 406L766 436L726 390L676 344L618 350L570 334L520 362Z" fill="#DCE7F5" fill-opacity="0.78"/>
+  <path d="M0 760C104 726 188 720 284 746C380 772 472 832 586 818C680 806 780 742 900 740V900H0V760Z" fill="url(#greenSlope)"/>
+  <path d="M0 816C88 808 158 782 234 786C304 790 366 832 420 840C486 850 562 830 626 788C692 744 760 730 838 742C864 746 886 754 900 760V900H0V816Z" fill="#274333"/>
+  <path d="M0 900V702H900V900H0Z" fill="url(#deckShadow)" fill-opacity="0.26"/>
+  <path d="M76 744H822" stroke="#B8C7D3" stroke-width="8" stroke-opacity="0.9"/>
+  <path d="M126 744V900" stroke="#B8C7D3" stroke-width="8" stroke-opacity="0.9"/>
+  <path d="M302 744V900" stroke="#B8C7D3" stroke-width="8" stroke-opacity="0.9"/>
+  <path d="M480 744V900" stroke="#B8C7D3" stroke-width="8" stroke-opacity="0.9"/>
+  <path d="M658 744V900" stroke="#B8C7D3" stroke-width="8" stroke-opacity="0.9"/>
+  <path d="M786 744V900" stroke="#B8C7D3" stroke-width="8" stroke-opacity="0.9"/>
+  <path d="M66 900L180 782H308L194 900H66Z" fill="#6D5A48"/>
+  <path d="M264 900L378 782H506L392 900H264Z" fill="#795E49"/>
+  <path d="M462 900L576 782H704L590 900H462Z" fill="#896851"/>
+  <path d="M196 668H246V750H170V694L196 668Z" fill="#212A33"/>
+  <path d="M170 694H246L278 740H198L170 694Z" fill="#35414E"/>
+  <path d="M558 664H608V748H532V690L558 664Z" fill="#212A33"/>
+  <path d="M532 690H608L640 736H560L532 690Z" fill="#35414E"/>
+  <defs>
+    <linearGradient id="sky2" x1="450" y1="0" x2="450" y2="900" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#CBD6E5"/>
+      <stop offset="0.32" stop-color="#97A8BF"/>
+      <stop offset="0.6" stop-color="#657A94"/>
+      <stop offset="1" stop-color="#273C49"/>
+    </linearGradient>
+    <linearGradient id="mist" x1="450" y1="0" x2="450" y2="532" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FFFFFF"/>
+      <stop offset="1" stop-color="#FFFFFF" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="rangeBack" x1="450" y1="362" x2="450" y2="900" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#516578"/>
+      <stop offset="1" stop-color="#263642"/>
+    </linearGradient>
+    <linearGradient id="rangeFront" x1="450" y1="520" x2="450" y2="900" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#31424E"/>
+      <stop offset="1" stop-color="#18252C"/>
+    </linearGradient>
+    <linearGradient id="greenSlope" x1="450" y1="740" x2="450" y2="900" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#4A7056"/>
+      <stop offset="1" stop-color="#1F3528"/>
+    </linearGradient>
+    <linearGradient id="deckShadow" x1="450" y1="702" x2="450" y2="900" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#F0F6FA"/>
+      <stop offset="1" stop-color="#36454F"/>
+    </linearGradient>
+  </defs>
+</svg>

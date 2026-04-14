@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>JIJUN | 지출</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body data-page="budget">
+  <div class="site-shell">
+    <header class="topbar">
+      <a class="brand" href="index.html">
+        <span class="brand-mark">J</span>
+        <span>
+          <strong>JIJUN</strong>
+          <small>쿤밍 · 리장 · 샹그릴라 여행</small>
+        </span>
+      </a>
+      <nav class="nav">
+        <a href="index.html">홈/개요</a>
+        <a href="schedule.html">여행 일정표</a>
+        <a href="details.html">날짜별 상세</a>
+        <a href="budget.html">지출</a>
+        <a href="links.html">예약/링크</a>
+      </nav>
+    </header>
+
+    <main>
+      <section class="page-header">
+        <p class="eyebrow">Travel Expenses</p>
+        <h1>지출</h1>
+        <p>항공, 숙소, 식비 같은 항목을 직접 등록하고 총합과 카테고리별 지출을 한눈에 확인할 수 있습니다.</p>
+      </section>
+
+      <section class="grid budget-grid">
+        <article class="panel accent">
+          <p class="eyebrow">Total</p>
+          <h2>총지출</h2>
+          <p class="big-number" id="budget-total">₩0</p>
+          <p class="muted">등록한 지출 항목 전체 합계</p>
+        </article>
+
+        <article class="panel">
+          <p class="eyebrow">Per Person</p>
+          <h2>1인당 지출 비용</h2>
+          <p class="big-number" id="budget-per-person">₩0</p>
+          <p class="muted">2인 기준으로 나눈 예상 금액</p>
+        </article>
+      </section>
+
+      <section class="grid budget-layout">
+        <article class="panel">
+          <div class="panel-head">
+            <p class="eyebrow">Add Expense</p>
+            <h2>지출 등록</h2>
+          </div>
+          <form id="budget-form" class="budget-form">
+            <label class="form-field">
+              <span>카테고리</span>
+              <select name="category" required>
+                <option value="항공">항공</option>
+                <option value="숙소">숙소</option>
+                <option value="식비">식비</option>
+                <option value="교통">교통</option>
+                <option value="관광">관광</option>
+                <option value="기타">기타</option>
+              </select>
+            </label>
+
+            <label class="form-field">
+              <span>항목명</span>
+              <input type="text" name="title" placeholder="예: 인천-쿤밍 항공권" required>
+            </label>
+
+            <label class="form-field">
+              <span>금액</span>
+              <input type="number" name="amount" placeholder="예: 420000" min="0" step="1" required>
+            </label>
+
+            <button type="submit" class="button primary budget-submit">지출 추가</button>
+          </form>
+        </article>
+
+        <article class="panel">
+          <div class="panel-head">
+            <p class="eyebrow">Summary</p>
+            <h2>카테고리별 지출</h2>
+          </div>
+          <div id="budget-summary" class="budget-summary"></div>
+        </article>
+      </section>
+
+      <section class="panel">
+        <div class="panel-head budget-list-head">
+          <div>
+            <p class="eyebrow">Expense Item</p>
+            <h2>등록된 지출</h2>
+          </div>
+          <button type="button" id="budget-reset" class="button secondary budget-reset">전체 초기화</button>
+        </div>
+        <div id="budget-items" class="budget-items"></div>
+      </section>
+    </main>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
