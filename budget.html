@@ -35,6 +35,17 @@
         <p>항공, 숙소, 식비 같은 항목을 직접 등록하고 총합과 카테고리별 지출을 한눈에 확인할 수 있습니다.</p>
       </section>
 
+      <section id="budget-setup-notice" class="panel setup-notice is-hidden">
+        <div class="panel-head">
+          <p class="eyebrow">Supabase Setup</p>
+          <h2>공유 지출 연결 필요</h2>
+        </div>
+        <p class="setup-copy">
+          아직 Supabase 연결 정보가 비어 있습니다. `supabase-config.js`에 프로젝트 URL과 anon key를 넣으면
+          같은 링크 접속자끼리 같은 지출 내역을 볼 수 있습니다.
+        </p>
+      </section>
+
       <section class="grid budget-grid">
         <article class="panel accent">
           <p class="eyebrow">Total</p>
@@ -106,6 +117,8 @@
     </main>
   </div>
 
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase-config.js"></script>
   <script src="script.js"></script>
 </body>
 </html>

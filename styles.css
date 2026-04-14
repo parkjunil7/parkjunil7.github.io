@@ -835,6 +835,20 @@ body[data-page="details"] .page-header h1 {
   gap: 16px;
 }
 
+.setup-notice {
+  border-style: dashed;
+}
+
+.setup-copy {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.8;
+}
+
+.is-hidden {
+  display: none;
+}
+
 
 .bar {
   width: 100%;

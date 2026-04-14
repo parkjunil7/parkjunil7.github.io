@@ -18,30 +18,18 @@ document.querySelectorAll(".nav a").forEach((link) => {
 
 if (currentPage === "budget") {
   const travelerCount = 2;
-  const storageKey = "travel-budget-items";
-  const defaultItems = [
-    { id: "flight-1", category: "항공", title: "인천-쿤밍 / 리장-인천 항공권", amount: 680000 },
-    { id: "hotel-1", category: "숙소", title: "쿤밍 · 리장 · 샹그릴라 숙소", amount: 540000 },
-    { id: "food-1", category: "식비", title: "여행 전체 식비 예상", amount: 280000 },
-  ];
-
   const form = document.getElementById("budget-form");
   const totalElement = document.getElementById("budget-total");
   const perPersonElement = document.getElementById("budget-per-person");
   const summaryElement = document.getElementById("budget-summary");
   const itemsElement = document.getElementById("budget-items");
   const resetButton = document.getElementById("budget-reset");
-
-  const readItems = () => {
-    try {
-      const saved = localStorage.getItem(storageKey);
-      return saved ? JSON.parse(saved) : defaultItems;
-    } catch {
-      return defaultItems;
-    }
-  };
-
-  let budgetItems = readItems();
+  const setupNotice = document.getElementById("budget-setup-notice");
+  const supabaseConfig = window.SUPABASE_CONFIG || {};
+  const supabaseUrl = supabaseConfig.url || "";
+  const supabaseAnonKey = supabaseConfig.anonKey || "";
+  let budgetItems = [];
+  let supabaseClient = null;
 
   const formatCurrency = (value) =>
     new Intl.NumberFormat("ko-KR", {
@@ -49,10 +37,6 @@ if (currentPage === "budget") {
       currency: "KRW",
       maximumFractionDigits: 0,
     }).format(value);
-
-  const saveItems = () => {
-    localStorage.setItem(storageKey, JSON.stringify(budgetItems));
-  };
 
   const renderBudget = () => {
     const total = budgetItems.reduce((sum, item) => sum + item.amount, 0);
@@ -108,36 +92,78 @@ if (currentPage === "budget") {
       .join("");
   };
 
-  form?.addEventListener("submit", (event) => {
-    event.preventDefault();
+  const setLoadingState = (isLoading) => {
+    const submitButton = form?.querySelector("button[type='submit']");
+    if (submitButton) {
+      submitButton.disabled = isLoading;
+    }
+    if (resetButton) {
+      resetButton.disabled = isLoading;
+    }
+  };
 
-    const formData = new FormData(form);
-    const category = String(formData.get("category") || "").trim();
-    const title = String(formData.get("title") || "").trim();
-    const amount = Number(formData.get("amount") || 0);
-
-    if (!category || !title || !amount) {
+  const loadExpenses = async () => {
+    if (!supabaseClient) {
       return;
     }
 
-    budgetItems = [
-      ...budgetItems,
-      {
-        id: `${Date.now()}`,
+    const { data, error } = await supabaseClient
+      .from("expenses")
+      .select("id, category, title, amount, created_at")
+      .order("created_at", { ascending: false });
+
+    if (error) {
+      summaryElement.innerHTML = "<p class='budget-summary-empty'>지출을 불러오지 못했습니다. Supabase 설정을 확인해주세요.</p>";
+      itemsElement.innerHTML = "";
+      return;
+    }
+
+    budgetItems = data || [];
+    renderBudget();
+  };
+
+  form?.addEventListener("submit", (event) => {
+    event.preventDefault();
+
+    if (!supabaseClient || !form) {
+      return;
+    }
+
+    const submit = async () => {
+      const formData = new FormData(form);
+      const category = String(formData.get("category") || "").trim();
+      const title = String(formData.get("title") || "").trim();
+      const amount = Number(formData.get("amount") || 0);
+
+      if (!category || !title || !amount) {
+        return;
+      }
+
+      setLoadingState(true);
+
+      const { error } = await supabaseClient.from("expenses").insert({
         category,
         title,
         amount,
-      },
-    ];
+      });
 
-    saveItems();
-    renderBudget();
-    form.reset();
+      setLoadingState(false);
+
+      if (error) {
+        alert("지출 저장에 실패했습니다. Supabase 설정 또는 권한을 확인해주세요.");
+        return;
+      }
+
+      form.reset();
+      await loadExpenses();
+    };
+
+    submit();
   });
 
   itemsElement?.addEventListener("click", (event) => {
     const target = event.target;
-    if (!(target instanceof HTMLElement)) {
+    if (!(target instanceof HTMLElement) || !supabaseClient) {
       return;
     }
 
@@ -146,18 +172,65 @@ if (currentPage === "budget") {
       return;
     }
 
-    budgetItems = budgetItems.filter((item) => item.id !== id);
-    saveItems();
-    renderBudget();
+    const removeExpense = async () => {
+      setLoadingState(true);
+      const { error } = await supabaseClient.from("expenses").delete().eq("id", id);
+      setLoadingState(false);
+
+      if (error) {
+        alert("지출 삭제에 실패했습니다.");
+        return;
+      }
+
+      await loadExpenses();
+    };
+
+    removeExpense();
   });
 
   resetButton?.addEventListener("click", () => {
-    budgetItems = [];
-    saveItems();
-    renderBudget();
+    if (!supabaseClient) {
+      return;
+    }
+
+    const resetExpenses = async () => {
+      setLoadingState(true);
+      const { error } = await supabaseClient.from("expenses").delete().gte("id", 0);
+      setLoadingState(false);
+
+      if (error) {
+        alert("전체 초기화에 실패했습니다.");
+        return;
+      }
+
+      await loadExpenses();
+    };
+
+    resetExpenses();
   });
 
-  renderBudget();
+  if (!supabaseUrl || !supabaseAnonKey || !window.supabase?.createClient) {
+    setupNotice?.classList.remove("is-hidden");
+    renderBudget();
+  } else {
+    supabaseClient = window.supabase.createClient(supabaseUrl, supabaseAnonKey);
+    loadExpenses();
+
+    supabaseClient
+      .channel("public:expenses")
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "expenses",
+        },
+        () => {
+          loadExpenses();
+        }
+      )
+      .subscribe();
+  }
 }
 
 if (currentPage === "home" && window.L) {
