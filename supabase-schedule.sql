@@ -3,6 +3,7 @@ create table if not exists public.itinerary_items (
   date date not null,
   day_label text not null,
   title text not null,
+  time text not null default '00:00',
   items jsonb not null default '[]'::jsonb,
   created_at timestamptz not null default now()
 );

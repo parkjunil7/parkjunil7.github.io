@@ -301,6 +301,7 @@ if (currentPage === "schedule") {
                       <h2>${item.title}</h2>
                       <button type="button" class="button secondary timeline-delete" data-id="${item.id}">삭제</button>
                     </div>
+                    <span class="timeline-time">${item.time || "--:--"}</span>
                     <ul>
                       ${(item.items || [])
                         .map((entry) => `<li>${entry}</li>`)
@@ -323,8 +324,9 @@ if (currentPage === "schedule") {
 
     const { data, error } = await supabaseClient
       .from("itinerary_items")
-      .select("id, date, day_label, title, items, created_at")
-      .order("date", { ascending: true });
+      .select("id, date, day_label, title, time, items, created_at")
+      .order("date", { ascending: true })
+      .order("time", { ascending: true });
 
     if (error) {
       listElement.innerHTML = "<p class='budget-empty'>일정을 불러오지 못했습니다. Supabase 테이블 설정을 확인해주세요.</p>";
@@ -346,12 +348,13 @@ if (currentPage === "schedule") {
       const formData = new FormData(form);
       const date = String(formData.get("date") || "").trim();
       const title = String(formData.get("title") || "").trim();
+      const time = String(formData.get("time") || "").trim();
       const items = String(formData.get("items") || "")
         .split("\n")
         .map((item) => item.trim())
         .filter(Boolean);
 
-      if (!date || !title || !items.length) {
+      if (!date || !title || !time || !items.length) {
         return;
       }
 
@@ -360,6 +363,7 @@ if (currentPage === "schedule") {
         date,
         day_label: getDayLabel(date),
         title,
+        time,
         items,
       });
       setLoadingState(false);
