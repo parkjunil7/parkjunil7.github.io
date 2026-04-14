@@ -60,9 +60,9 @@
             <label class="form-field">
               <span>시간</span>
               <div class="time-range-fields">
-                <input type="time" name="startTime" required>
+                <input type="text" name="startTime" inputmode="numeric" placeholder="07:45" pattern="^([01]\d|2[0-3]):([0-5]\d)$" required>
                 <span class="time-range-separator">~</span>
-                <input type="time" name="endTime" required>
+                <input type="text" name="endTime" inputmode="numeric" placeholder="10:50" pattern="^([01]\d|2[0-3]):([0-5]\d)$" required>
               </div>
             </label>
 

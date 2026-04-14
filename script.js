@@ -102,6 +102,8 @@ if (currentPage === "budget") {
     }
   };
 
+  const isValidTime = (value) => /^([01]\d|2[0-3]):([0-5]\d)$/.test(value);
+
   const loadExpenses = async () => {
     if (!supabaseClient) {
       return;
@@ -357,6 +359,11 @@ if (currentPage === "schedule") {
       const time = startTime && endTime ? `${startTime}~${endTime}` : "";
 
       if (!date || !title || !startTime || !endTime || !items.length) {
+        return;
+      }
+
+      if (!isValidTime(startTime) || !isValidTime(endTime)) {
+        alert("시간은 24시간 형식으로 입력해주세요. 예: 07:45");
         return;
       }
 
