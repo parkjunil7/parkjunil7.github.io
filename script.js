@@ -347,14 +347,16 @@ if (currentPage === "schedule") {
     const submit = async () => {
       const formData = new FormData(form);
       const date = String(formData.get("date") || "").trim();
+      const startTime = String(formData.get("startTime") || "").trim();
+      const endTime = String(formData.get("endTime") || "").trim();
       const title = String(formData.get("title") || "").trim();
-      const time = String(formData.get("time") || "").trim();
       const items = String(formData.get("items") || "")
         .split("\n")
         .map((item) => item.trim())
         .filter(Boolean);
+      const time = startTime && endTime ? `${startTime}~${endTime}` : "";
 
-      if (!date || !title || !time || !items.length) {
+      if (!date || !title || !startTime || !endTime || !items.length) {
         return;
       }
 

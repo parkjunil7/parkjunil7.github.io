@@ -692,6 +692,18 @@ body[data-page="details"] .page-header h1 {
   border-color: rgba(14, 138, 149, 0.4);
 }
 
+.time-range-fields {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  gap: 12px;
+  align-items: center;
+}
+
+.time-range-separator {
+  color: var(--muted);
+  font-weight: 700;
+}
+
 .timeline-body-head {
   display: flex;
   align-items: center;

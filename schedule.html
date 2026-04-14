@@ -58,13 +58,17 @@
             </label>
 
             <label class="form-field">
-              <span>제목</span>
-              <input type="text" name="title" placeholder="예: 출국 · 쿤밍 도착" required>
+              <span>시간</span>
+              <div class="time-range-fields">
+                <input type="time" name="startTime" required>
+                <span class="time-range-separator">~</span>
+                <input type="time" name="endTime" required>
+              </div>
             </label>
 
             <label class="form-field">
-              <span>시간</span>
-              <input type="time" name="time" required>
+              <span>제목</span>
+              <input type="text" name="title" placeholder="예: 출국 · 쿤밍 도착" required>
             </label>
 
             <label class="form-field">
