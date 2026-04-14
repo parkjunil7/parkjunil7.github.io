@@ -234,11 +234,9 @@ if (currentPage === "budget") {
 }
 
 if (currentPage === "schedule") {
+  const tripStartDate = "2026-04-30";
   const form = document.getElementById("schedule-form");
   const listElement = document.getElementById("schedule-list");
-  const countElement = document.getElementById("schedule-count");
-  const firstDateElement = document.getElementById("schedule-first-date");
-  const lastDateElement = document.getElementById("schedule-last-date");
   const resetButton = document.getElementById("schedule-reset");
   const setupNotice = document.getElementById("schedule-setup-notice");
   const supabaseConfig = window.SUPABASE_CONFIG || {};
@@ -255,6 +253,13 @@ if (currentPage === "schedule") {
     return `${month}.${day} ${weekday}`;
   };
 
+  const getDayLabel = (value) => {
+    const start = new Date(tripStartDate);
+    const current = new Date(value);
+    const diff = Math.round((current - start) / (1000 * 60 * 60 * 24));
+    return `DAY ${diff + 1}`;
+  };
+
   const setLoadingState = (isLoading) => {
     const submitButton = form?.querySelector("button[type='submit']");
     if (submitButton) {
@@ -266,18 +271,12 @@ if (currentPage === "schedule") {
   };
 
   const renderSchedule = () => {
-    countElement.textContent = `${scheduleItems.length}개`;
-
     if (!scheduleItems.length) {
-      firstDateElement.textContent = "-";
-      lastDateElement.textContent = "-";
       listElement.innerHTML = "<p class='budget-empty'>등록된 일정이 없습니다. 첫 일정을 추가해보세요.</p>";
       return;
     }
 
     const sortedDates = [...scheduleItems].sort((a, b) => new Date(a.date) - new Date(b.date));
-    firstDateElement.textContent = formatDate(sortedDates[0].date);
-    lastDateElement.textContent = formatDate(sortedDates[sortedDates.length - 1].date);
 
     listElement.innerHTML = sortedDates
       .map(
@@ -333,21 +332,20 @@ if (currentPage === "schedule") {
     const submit = async () => {
       const formData = new FormData(form);
       const date = String(formData.get("date") || "").trim();
-      const dayLabel = String(formData.get("dayLabel") || "").trim();
       const title = String(formData.get("title") || "").trim();
       const items = String(formData.get("items") || "")
         .split("\n")
         .map((item) => item.trim())
         .filter(Boolean);
 
-      if (!date || !dayLabel || !title || !items.length) {
+      if (!date || !title || !items.length) {
         return;
       }
 
       setLoadingState(true);
       const { error } = await supabaseClient.from("itinerary_items").insert({
         date,
-        day_label: dayLabel,
+        day_label: getDayLabel(date),
         title,
         items,
       });

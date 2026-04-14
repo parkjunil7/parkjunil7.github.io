@@ -58,11 +58,6 @@
             </label>
 
             <label class="form-field">
-              <span>DAY 표시</span>
-              <input type="text" name="dayLabel" placeholder="예: DAY 1" required>
-            </label>
-
-            <label class="form-field">
               <span>제목</span>
               <input type="text" name="title" placeholder="예: 출국 · 쿤밍 도착" required>
             </label>
@@ -75,28 +70,14 @@
             <button type="submit" class="button primary budget-submit">일정 추가</button>
           </form>
         </article>
+      </section>
 
-        <article class="panel accent">
-          <div class="panel-head">
-            <p class="eyebrow">Overview</p>
-            <h2>일정 요약</h2>
-          </div>
-          <div class="schedule-stats">
-            <div class="schedule-stat">
-              <span class="label">등록 일정 수</span>
-              <strong id="schedule-count">0개</strong>
-            </div>
-            <div class="schedule-stat">
-              <span class="label">첫 일정</span>
-              <strong id="schedule-first-date">-</strong>
-            </div>
-            <div class="schedule-stat">
-              <span class="label">마지막 일정</span>
-              <strong id="schedule-last-date">-</strong>
-            </div>
-          </div>
-          <button type="button" id="schedule-reset" class="button secondary budget-reset">전체 초기화</button>
-        </article>
+      <section class="panel schedule-toolbar">
+        <div>
+          <p class="eyebrow">Manage Timeline</p>
+          <h2>등록된 일정 관리</h2>
+        </div>
+        <button type="button" id="schedule-reset" class="button secondary budget-reset">전체 초기화</button>
       </section>
 
       <section id="schedule-list" class="timeline"></section>
