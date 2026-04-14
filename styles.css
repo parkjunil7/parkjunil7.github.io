@@ -711,6 +711,17 @@ body[data-page="details"] .page-header h1 {
   gap: 16px;
 }
 
+.timeline-group {
+  display: grid;
+  gap: 18px;
+}
+
+.timeline-entry + .timeline-entry {
+  margin-top: 24px;
+  padding-top: 24px;
+  border-top: 1px solid rgba(12, 79, 104, 0.08);
+}
+
 .detail-stack {
   display: grid;
   gap: 18px;

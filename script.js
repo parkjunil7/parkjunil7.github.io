@@ -277,29 +277,42 @@ if (currentPage === "schedule") {
     }
 
     const sortedDates = [...scheduleItems].sort((a, b) => new Date(a.date) - new Date(b.date));
+    const groupedByDate = sortedDates.reduce((acc, item) => {
+      if (!acc[item.date]) {
+        acc[item.date] = [];
+      }
+      acc[item.date].push(item);
+      return acc;
+    }, {});
 
-    listElement.innerHTML = sortedDates
-      .map(
-        (item) => `
-          <article class="timeline-day">
-            <div class="timeline-date">
-              <span>${item.day_label}</span>
-              <strong>${formatDate(item.date)}</strong>
-            </div>
-            <div class="timeline-body">
-              <div class="timeline-body-head">
-                <h2>${item.title}</h2>
-                <button type="button" class="button secondary timeline-delete" data-id="${item.id}">삭제</button>
-              </div>
-              <ul>
-                ${(item.items || [])
-                  .map((entry) => `<li>${entry}</li>`)
-                  .join("")}
-              </ul>
-            </div>
-          </article>
-        `
-      )
+    listElement.innerHTML = Object.entries(groupedByDate)
+      .map(([date, items]) => `
+        <article class="timeline-day timeline-group">
+          <div class="timeline-date">
+            <span>${items[0].day_label}</span>
+            <strong>${formatDate(date)}</strong>
+          </div>
+          <div class="timeline-body">
+            ${items
+              .map(
+                (item) => `
+                  <section class="timeline-entry">
+                    <div class="timeline-body-head">
+                      <h2>${item.title}</h2>
+                      <button type="button" class="button secondary timeline-delete" data-id="${item.id}">삭제</button>
+                    </div>
+                    <ul>
+                      ${(item.items || [])
+                        .map((entry) => `<li>${entry}</li>`)
+                        .join("")}
+                    </ul>
+                  </section>
+                `
+              )
+              .join("")}
+          </div>
+        </article>
+      `)
       .join("");
   };
 
