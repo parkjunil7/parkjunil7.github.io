@@ -104,6 +104,8 @@ if (currentPage === "budget") {
 
   const isValidTime = (value) => /^([01]\d|2[0-3]):([0-5]\d)$/.test(value);
 
+  const isValidTime = (value) => /^([01]\d|2[0-3]):([0-5]\d)$/.test(value);
+
   const loadExpenses = async () => {
     if (!supabaseClient) {
       return;
