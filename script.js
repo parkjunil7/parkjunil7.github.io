@@ -265,7 +265,7 @@ if (currentPage === "schedule") {
   const boardStartHour = 1;
   const boardEndHour = 24;
   const minutesPerHour = 60;
-  const totalBoardMinutes = (boardEndHour - boardStartHour) * minutesPerHour;
+  const totalBoardMinutes = 24 * minutesPerHour;
 
   const formatDate = (value) => {
     const date = new Date(value);
