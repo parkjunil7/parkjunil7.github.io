@@ -873,14 +873,23 @@ body[data-page="details"] .page-header h1 {
 }
 
 .checklist-layout {
-  grid-template-columns: 0.8fr 1.2fr;
+  grid-template-columns: 0.92fr 1.08fr;
   align-items: start;
 }
 
 .checklist-summary-panel,
+.checklist-sidecards,
 .checklist-groups {
   display: grid;
   gap: 18px;
+}
+
+.checklist-sidecards {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.checklist-info-card {
+  height: 100%;
 }
 
 .checklist-progress {
@@ -899,24 +908,7 @@ body[data-page="details"] .page-header h1 {
 
 .checklist-group {
   display: grid;
-  gap: 16px;
-}
-
-.checklist-group-head {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
   gap: 12px;
-}
-
-.checklist-group-head h2 {
-  margin: 0;
-}
-
-.checklist-count {
-  color: var(--muted);
-  font-size: 0.88rem;
-  font-weight: 700;
 }
 
 .checklist-items {
@@ -1003,6 +995,29 @@ body[data-page="details"] .page-header h1 {
   margin: 0;
   color: var(--muted);
   line-height: 1.6;
+}
+
+.checklist-dday {
+  display: grid;
+  gap: 14px;
+}
+
+.checklist-dday strong {
+  font-family: "Space Grotesk", sans-serif;
+  font-size: clamp(2rem, 5vw, 3rem);
+  line-height: 1;
+}
+
+.checklist-pending-list {
+  display: grid;
+  gap: 10px;
+  margin: 0;
+  padding-left: 18px;
+  color: var(--muted);
+}
+
+.checklist-pending-list li {
+  line-height: 1.5;
 }
 
 .detail-heading {

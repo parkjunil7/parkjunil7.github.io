@@ -256,11 +256,15 @@ if (currentPage === "details") {
   const progressCountElement = document.getElementById("checklist-progress-count");
   const progressBarElement = document.getElementById("checklist-progress-bar");
   const progressCopyElement = document.getElementById("checklist-progress-copy");
+  const ddayValueElement = document.getElementById("checklist-dday-value");
+  const ddayCopyElement = document.getElementById("checklist-dday-copy");
+  const pendingListElement = document.getElementById("checklist-pending-list");
   const supabaseConfig = window.SUPABASE_CONFIG || {};
   const supabaseUrl = supabaseConfig.url || "";
   const supabaseAnonKey = supabaseConfig.anonKey || "";
   let supabaseClient = null;
   let checklistItems = [];
+  const departureDate = "2026-04-30";
 
   const defaultChecklistItems = [
     {
@@ -315,10 +319,27 @@ if (currentPage === "details") {
       .replaceAll('"', "&quot;")
       .replaceAll("'", "&#39;");
 
+  const getDdayText = () => {
+    const today = new Date();
+    const currentDate = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+    const targetDate = new Date(`${departureDate}T00:00:00`);
+    const diff = Math.round((targetDate - currentDate) / (1000 * 60 * 60 * 24));
+
+    if (diff > 0) {
+      return { label: `D-${diff}`, copy: `${departureDate} 출발까지 ${diff}일 남았어요.` };
+    }
+    if (diff === 0) {
+      return { label: "D-Day", copy: "오늘 출발입니다. 마지막 확인만 하면 돼요." };
+    }
+    return { label: `D+${Math.abs(diff)}`, copy: `${departureDate} 출발 기준 ${Math.abs(diff)}일 지났어요.` };
+  };
+
   const renderChecklist = () => {
     const totalCount = checklistItems.length;
     const completedCount = checklistItems.filter((item) => item.is_checked).length;
     const progress = totalCount ? Math.round((completedCount / totalCount) * 100) : 0;
+    const pendingItems = checklistItems.filter((item) => !item.is_checked);
+    const dday = getDdayText();
 
     if (progressCountElement) {
       progressCountElement.textContent = `${completedCount} / ${totalCount} 완료`;
@@ -334,6 +355,21 @@ if (currentPage === "details") {
         : "출발 전 체크할 항목을 정리하고 있어요.";
     }
 
+    if (ddayValueElement) {
+      ddayValueElement.textContent = dday.label;
+    }
+    if (ddayCopyElement) {
+      ddayCopyElement.textContent = dday.copy;
+    }
+    if (pendingListElement) {
+      pendingListElement.innerHTML = pendingItems.length
+        ? pendingItems
+            .slice(0, 4)
+            .map((item) => `<li>${escapeHtml(item.title)}</li>`)
+            .join("")
+        : "<li>남은 항목이 없어요. 준비 완료입니다.</li>";
+    }
+
     if (!groupsElement) {
       return;
     }
@@ -343,45 +379,28 @@ if (currentPage === "details") {
       return;
     }
 
-    const grouped = checklistItems.reduce((acc, item) => {
-      if (!acc[item.category]) {
-        acc[item.category] = [];
-      }
-      acc[item.category].push(item);
-      return acc;
-    }, {});
-
-    groupsElement.innerHTML = Object.entries(grouped)
-      .map(([category, items]) => {
-        const checkedCount = items.filter((item) => item.is_checked).length;
-        return `
-          <section class="panel checklist-group">
-            <div class="checklist-group-head">
-              <h2>${escapeHtml(category)}</h2>
-              <span class="checklist-count">${checkedCount}/${items.length} 완료</span>
-            </div>
-            <div class="checklist-items">
-              ${items
-                .map(
-                  (item) => `
-                    <label class="checklist-item ${item.is_checked ? "is-checked" : ""}">
-                      <span class="checklist-item-toggle">
-                        <input type="checkbox" data-id="${item.id}" ${item.is_checked ? "checked" : ""}>
-                        <span></span>
-                      </span>
-                      <span class="checklist-item-copy">
-                        <strong>${escapeHtml(item.title)}</strong>
-                        <p>${escapeHtml(item.note || "")}</p>
-                      </span>
-                    </label>
-                  `
-                )
-                .join("")}
-            </div>
-          </section>
-        `;
-      })
-      .join("");
+    groupsElement.innerHTML = `
+      <section class="panel checklist-group">
+        <div class="checklist-items">
+          ${checklistItems
+            .map(
+              (item) => `
+                <label class="checklist-item ${item.is_checked ? "is-checked" : ""}">
+                  <span class="checklist-item-toggle">
+                    <input type="checkbox" data-id="${item.id}" ${item.is_checked ? "checked" : ""}>
+                    <span></span>
+                  </span>
+                  <span class="checklist-item-copy">
+                    <strong>${escapeHtml(item.title)}</strong>
+                    <p>${escapeHtml(item.note || "")}</p>
+                  </span>
+                </label>
+              `
+            )
+            .join("")}
+        </div>
+      </section>
+    `;
   };
 
   const loadChecklist = async () => {
