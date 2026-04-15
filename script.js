@@ -250,6 +250,238 @@ if (currentPage === "budget") {
   }
 }
 
+if (currentPage === "details") {
+  const groupsElement = document.getElementById("checklist-groups");
+  const setupNotice = document.getElementById("checklist-setup-notice");
+  const progressCountElement = document.getElementById("checklist-progress-count");
+  const progressBarElement = document.getElementById("checklist-progress-bar");
+  const progressCopyElement = document.getElementById("checklist-progress-copy");
+  const supabaseConfig = window.SUPABASE_CONFIG || {};
+  const supabaseUrl = supabaseConfig.url || "";
+  const supabaseAnonKey = supabaseConfig.anonKey || "";
+  let supabaseClient = null;
+  let checklistItems = [];
+
+  const defaultChecklistItems = [
+    {
+      slug: "travel-documents",
+      category: "출발 전",
+      title: "필수 서류 챙기기",
+      note: "여권, 항공권, 호텔 예약내역, 여행자보험 가입내역 확인",
+      sort_order: 10,
+    },
+    {
+      slug: "travel-insurance",
+      category: "출발 전",
+      title: "여행자보험 가입하기",
+      note: "보장 범위와 보험증권 PDF 저장 여부까지 확인",
+      sort_order: 20,
+    },
+    {
+      slug: "esim-roaming",
+      category: "출발 전",
+      title: "eSIM 또는 로밍 설정하기",
+      note: "출국 전 개통 방식과 현지 데이터 사용 가능 여부 확인",
+      sort_order: 30,
+    },
+    {
+      slug: "power-bank",
+      category: "준비물",
+      title: "보조배터리 확인하기",
+      note: "용량, 충전 상태, 항공 반입 가능 여부, CCC 인증 여부 체크",
+      sort_order: 40,
+    },
+    {
+      slug: "medicine-kit",
+      category: "준비물",
+      title: "상비약 챙기기",
+      note: "소화제, 지사제, 진통제, 감기약 등 필요한 약 미리 준비",
+      sort_order: 50,
+    },
+    {
+      slug: "cash-exchange",
+      category: "출발 전",
+      title: "환전하기",
+      note: "현금 30만원 수준이 적당한지 최종 예산과 결제수단 기준으로 점검",
+      sort_order: 60,
+    },
+  ];
+
+  const escapeHtml = (value) =>
+    String(value ?? "")
+      .replaceAll("&", "&amp;")
+      .replaceAll("<", "&lt;")
+      .replaceAll(">", "&gt;")
+      .replaceAll('"', "&quot;")
+      .replaceAll("'", "&#39;");
+
+  const renderChecklist = () => {
+    const totalCount = checklistItems.length;
+    const completedCount = checklistItems.filter((item) => item.is_checked).length;
+    const progress = totalCount ? Math.round((completedCount / totalCount) * 100) : 0;
+
+    if (progressCountElement) {
+      progressCountElement.textContent = `${completedCount} / ${totalCount} 완료`;
+    }
+    if (progressBarElement) {
+      progressBarElement.style.width = `${progress}%`;
+    }
+    if (progressCopyElement) {
+      progressCopyElement.textContent = totalCount
+        ? progress === 100
+          ? "출발 준비가 모두 끝났어요."
+          : `${totalCount - completedCount}개 남았어요. 출발 전에 하나씩 체크해보세요.`
+        : "출발 전 체크할 항목을 정리하고 있어요.";
+    }
+
+    if (!groupsElement) {
+      return;
+    }
+
+    if (!totalCount) {
+      groupsElement.innerHTML = "<p class='budget-empty'>체크리스트 항목이 아직 없습니다.</p>";
+      return;
+    }
+
+    const grouped = checklistItems.reduce((acc, item) => {
+      if (!acc[item.category]) {
+        acc[item.category] = [];
+      }
+      acc[item.category].push(item);
+      return acc;
+    }, {});
+
+    groupsElement.innerHTML = Object.entries(grouped)
+      .map(([category, items]) => {
+        const checkedCount = items.filter((item) => item.is_checked).length;
+        return `
+          <section class="panel checklist-group">
+            <div class="checklist-group-head">
+              <h2>${escapeHtml(category)}</h2>
+              <span class="checklist-count">${checkedCount}/${items.length} 완료</span>
+            </div>
+            <div class="checklist-items">
+              ${items
+                .map(
+                  (item) => `
+                    <label class="checklist-item ${item.is_checked ? "is-checked" : ""}">
+                      <span class="checklist-item-toggle">
+                        <input type="checkbox" data-id="${item.id}" ${item.is_checked ? "checked" : ""}>
+                        <span></span>
+                      </span>
+                      <span class="checklist-item-copy">
+                        <strong>${escapeHtml(item.title)}</strong>
+                        <p>${escapeHtml(item.note || "")}</p>
+                      </span>
+                    </label>
+                  `
+                )
+                .join("")}
+            </div>
+          </section>
+        `;
+      })
+      .join("");
+  };
+
+  const loadChecklist = async () => {
+    if (!supabaseClient) {
+      return;
+    }
+
+    const { data, error } = await supabaseClient
+      .from("trip_checklist_items")
+      .select("id, slug, category, title, note, sort_order, is_checked")
+      .order("sort_order", { ascending: true })
+      .order("id", { ascending: true });
+
+    if (error) {
+      groupsElement.innerHTML = "<p class='budget-empty'>체크리스트를 불러오지 못했습니다. Supabase 설정을 확인해주세요.</p>";
+      return;
+    }
+
+    if (!data?.length) {
+      const { error: seedError } = await supabaseClient
+        .from("trip_checklist_items")
+        .upsert(defaultChecklistItems, { onConflict: "slug" });
+
+      if (seedError) {
+        groupsElement.innerHTML = `<p class='budget-empty'>기본 체크리스트 생성에 실패했습니다: ${escapeHtml(seedError.message)}</p>`;
+        return;
+      }
+
+      await loadChecklist();
+      return;
+    }
+
+    checklistItems = data || [];
+    renderChecklist();
+  };
+
+  groupsElement?.addEventListener("change", (event) => {
+    const target = event.target;
+    if (!(target instanceof HTMLInputElement) || target.type !== "checkbox" || !supabaseClient) {
+      return;
+    }
+
+    const { id } = target.dataset;
+    if (!id) {
+      return;
+    }
+
+    const nextChecked = target.checked;
+    checklistItems = checklistItems.map((item) =>
+      `${item.id}` === id ? { ...item, is_checked: nextChecked } : item
+    );
+    renderChecklist();
+
+    const updateChecklist = async () => {
+      const { error } = await supabaseClient
+        .from("trip_checklist_items")
+        .update({
+          is_checked: nextChecked,
+          updated_at: new Date().toISOString(),
+        })
+        .eq("id", id);
+
+      if (error) {
+        alert(`체크 상태 저장에 실패했습니다: ${error.message}`);
+        await loadChecklist();
+      }
+    };
+
+    updateChecklist();
+  });
+
+  if (!supabaseUrl || !supabaseAnonKey || !window.supabase?.createClient) {
+    setupNotice?.classList.remove("is-hidden");
+    checklistItems = defaultChecklistItems.map((item, index) => ({
+      ...item,
+      id: `local-${index}`,
+      is_checked: false,
+    }));
+    renderChecklist();
+  } else {
+    supabaseClient = window.supabase.createClient(supabaseUrl, supabaseAnonKey);
+    loadChecklist();
+
+    supabaseClient
+      .channel("public:trip_checklist_items")
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "trip_checklist_items",
+        },
+        () => {
+          loadChecklist();
+        }
+      )
+      .subscribe();
+  }
+}
+
 if (currentPage === "schedule") {
   const tripStartDate = "2026-04-30";
   const form = document.getElementById("schedule-form");

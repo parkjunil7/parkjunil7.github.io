@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>JIJUN | 날짜별 상세</title>
+  <title>JIJUN | 여행 체크리스트</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
@@ -22,7 +22,7 @@
       <nav class="nav">
         <a href="index.html">홈/개요</a>
         <a href="schedule.html">여행 일정표</a>
-        <a href="details.html">날짜별 상세</a>
+        <a href="details.html">체크리스트</a>
         <a href="budget.html">지출</a>
         <a href="links.html">예약/링크</a>
       </nav>
@@ -30,190 +30,41 @@
 
     <main>
       <section class="page-header">
-        <p class="eyebrow">Daily Plan</p>
-        <h1>날짜별 상세</h1>
-        <p>일정표 흐름에 맞춰 날짜별 장소, 이동, 숙소, 메모를 조금 더 자세하게 정리한 페이지입니다.</p>
+        <p class="eyebrow">Shared Checklist</p>
+        <h1>여행 체크리스트</h1>
+        <p>체크박스를 누르면 완료 상태가 저장되고, 같은 링크를 보는 사람 모두가 같은 체크 상태를 확인할 수 있습니다.</p>
       </section>
 
-      <section class="detail-stack">
-        <article class="detail-card">
-          <div class="detail-heading">
-            <span class="pill">04.30 Thu</span>
-            <h2>출국 · 쿤밍 도착</h2>
+      <section class="grid checklist-layout">
+        <article class="panel checklist-summary-panel">
+          <div class="panel-head">
+            <p class="eyebrow">Progress</p>
+            <h2>준비 현황</h2>
           </div>
-          <div class="detail-columns">
-            <div>
-              <span class="label">이동</span>
-              <p>07:45 인천(ICN) 출발 → 10:50 쿤밍(KMG) 도착</p>
-            </div>
-            <div>
-              <span class="label">장소</span>
-              <p>공항, 숙소 주변, 쿤밍 시내 첫 동선</p>
-            </div>
-            <div>
-              <span class="label">숙소</span>
-              <p>쿤밍 숙소 체크인 및 짐 정리</p>
-            </div>
-            <div>
-              <span class="label">메모</span>
-              <p>도착 후 무리하지 않고 주변 산책과 첫 식사 위주로 움직이기</p>
-            </div>
+          <div class="checklist-progress">
+            <strong id="checklist-progress-count">0 / 0 완료</strong>
+            <div class="bar"><span id="checklist-progress-bar" style="width: 0%"></span></div>
+            <p id="checklist-progress-copy" class="budget-empty">출발 전 체크할 항목을 정리하고 있어요.</p>
           </div>
         </article>
 
-        <article class="detail-card">
-          <div class="detail-heading">
-            <span class="pill">05.01 Fri</span>
-            <h2>쿤밍 일정</h2>
+        <article id="checklist-setup-notice" class="panel setup-notice is-hidden">
+          <div class="panel-head">
+            <p class="eyebrow">Supabase Setup</p>
+            <h2>체크리스트 테이블 생성 필요</h2>
           </div>
-          <div class="detail-columns">
-            <div>
-              <span class="label">장소</span>
-              <p>쿤밍 시내 관광 스팟, 카페, 식당</p>
-            </div>
-            <div>
-              <span class="label">식사</span>
-              <p>로컬 식당 중심으로 여유 있게 식사</p>
-            </div>
-            <div>
-              <span class="label">숙소</span>
-              <p>쿤밍 숙소 1박</p>
-            </div>
-            <div>
-              <span class="label">메모</span>
-              <p>다음날 리장 이동이 있어 저녁에는 너무 늦지 않게 마무리</p>
-            </div>
-          </div>
-        </article>
-
-        <article class="detail-card">
-          <div class="detail-heading">
-            <span class="pill">05.02 Sat</span>
-            <h2>쿤밍 → 리장</h2>
-          </div>
-          <div class="detail-columns">
-            <div>
-              <span class="label">이동</span>
-              <p>기차 이동, 예상 4시간</p>
-            </div>
-            <div>
-              <span class="label">장소</span>
-              <p>쿤밍역, 리장 도착지, 리장 고성 주변</p>
-            </div>
-            <div>
-              <span class="label">숙소</span>
-              <p>리장 숙소 체크인</p>
-            </div>
-            <div>
-              <span class="label">메모</span>
-              <p>이동일이라 동선은 가볍게, 저녁에는 고성 산책 위주</p>
-            </div>
-          </div>
-        </article>
-
-        <article class="detail-card">
-          <div class="detail-heading">
-            <span class="pill">05.03 Sun</span>
-            <h2>리장 핵심 일정</h2>
-          </div>
-          <div class="detail-columns">
-            <div>
-              <span class="label">장소</span>
-              <p>설산 풍경 스팟, 호수, 자연 경관 지역</p>
-            </div>
-            <div>
-              <span class="label">식사</span>
-              <p>리장 현지식 또는 전망 좋은 식당</p>
-            </div>
-            <div>
-              <span class="label">숙소</span>
-              <p>리장 숙소 복귀</p>
-            </div>
-            <div>
-              <span class="label">메모</span>
-              <p>사진 많이 남기는 날이라 여유 있는 일정으로 운영</p>
-            </div>
-          </div>
-        </article>
-
-        <article class="detail-card">
-          <div class="detail-heading">
-            <span class="pill">05.04 Mon</span>
-            <h2>리장 → 샹그릴라</h2>
-          </div>
-          <div class="detail-columns">
-            <div>
-              <span class="label">이동</span>
-              <p>차량 이동, 예상 2시간</p>
-            </div>
-            <div>
-              <span class="label">장소</span>
-              <p>리장 출발, 샹그릴라 도착 후 숙소 주변</p>
-            </div>
-            <div>
-              <span class="label">숙소</span>
-              <p>샹그릴라 숙소 체크인</p>
-            </div>
-            <div>
-              <span class="label">메모</span>
-              <p>고도 차이에 적응할 수 있게 도착 후에는 천천히 움직이기</p>
-            </div>
-          </div>
-        </article>
-
-        <article class="detail-card">
-          <div class="detail-heading">
-            <span class="pill">05.05 Tue</span>
-            <h2>샹그릴라 일정</h2>
-          </div>
-          <div class="detail-columns">
-            <div>
-              <span class="label">장소</span>
-              <p>전망 포인트, 산책 코스, 분위기 좋은 거리</p>
-            </div>
-            <div>
-              <span class="label">식사</span>
-              <p>현지식 또는 숙소 근처 식당</p>
-            </div>
-            <div>
-              <span class="label">숙소</span>
-              <p>샹그릴라 마지막 숙박</p>
-            </div>
-            <div>
-              <span class="label">메모</span>
-              <p>다음날 귀국 일정이 있으니 짐 정리와 컨디션 조절하기</p>
-            </div>
-          </div>
-        </article>
-
-        <article class="detail-card">
-          <div class="detail-heading">
-            <span class="pill">05.06 Wed</span>
-            <h2>귀국일</h2>
-          </div>
-          <div class="detail-columns">
-            <div>
-              <span class="label">이동</span>
-              <p>12:05 리장(LJG) 출발 → 쿤밍 4시간 경유 → 22:45 인천(ICN) 도착</p>
-            </div>
-            <div>
-              <span class="label">장소</span>
-              <p>공항, 경유 대기, 인천 도착</p>
-            </div>
-            <div>
-              <span class="label">준비</span>
-              <p>수하물, 탑승권, 귀국 후 교통편 재확인</p>
-            </div>
-            <div>
-              <span class="label">메모</span>
-              <p>경유 시간이 길어서 공항 내 휴식 동선도 미리 체크해두기</p>
-            </div>
-          </div>
+          <p class="setup-copy">
+            Supabase에 <code>trip_checklist_items</code> 테이블을 만든 뒤 다시 열면 공유 체크리스트가 바로 동작합니다.
+          </p>
         </article>
       </section>
+
+      <section id="checklist-groups" class="checklist-groups"></section>
     </main>
   </div>
 
-  <script src="script.js?v=20260415-2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase-config.js"></script>
+  <script src="script.js?v=20260415-3"></script>
 </body>
 </html>
