@@ -753,7 +753,9 @@ body[data-page="details"] .page-header h1 {
 
 .schedule-board {
   overflow-x: auto;
+  overflow-y: hidden;
   padding-bottom: 8px;
+  -webkit-overflow-scrolling: touch;
 }
 
 .schedule-board-empty {
@@ -762,11 +764,12 @@ body[data-page="details"] .page-header h1 {
 
 .schedule-board-grid {
   --time-column-width: 84px;
-  --day-column-width: minmax(180px, 1fr);
+  --day-column-width: 220px;
   --hour-row-height: 64px;
   display: grid;
   grid-template-columns: var(--time-column-width) repeat(var(--day-count, 1), var(--day-column-width));
   grid-template-rows: 72px repeat(24, var(--hour-row-height));
+  width: max-content;
   min-width: 100%;
   border: 1px solid rgba(12, 79, 104, 0.12);
   border-radius: 24px;
