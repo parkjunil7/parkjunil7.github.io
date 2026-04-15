@@ -106,6 +106,7 @@ if (currentPage === "budget") {
         `
       )
       .join("");
+
   };
 
   const setLoadingState = (isLoading) => {
@@ -253,6 +254,7 @@ if (currentPage === "schedule") {
   const tripStartDate = "2026-04-30";
   const form = document.getElementById("schedule-form");
   const listElement = document.getElementById("schedule-list");
+  const boardElement = document.getElementById("schedule-board");
   const resetButton = document.getElementById("schedule-reset");
   const setupNotice = document.getElementById("schedule-setup-notice");
   const supabaseConfig = window.SUPABASE_CONFIG || {};
@@ -260,6 +262,10 @@ if (currentPage === "schedule") {
   const supabaseAnonKey = supabaseConfig.anonKey || "";
   let scheduleItems = [];
   let supabaseClient = null;
+  const boardStartHour = 1;
+  const boardEndHour = 24;
+  const minutesPerHour = 60;
+  const totalBoardMinutes = (boardEndHour - boardStartHour) * minutesPerHour;
 
   const formatDate = (value) => {
     const date = new Date(value);
@@ -276,6 +282,118 @@ if (currentPage === "schedule") {
     return `DAY ${diff + 1}`;
   };
 
+  const escapeHtml = (value) =>
+    String(value ?? "")
+      .replaceAll("&", "&amp;")
+      .replaceAll("<", "&lt;")
+      .replaceAll(">", "&gt;")
+      .replaceAll('"', "&quot;")
+      .replaceAll("'", "&#39;");
+
+  const parseTimeToMinutes = (value) => {
+    if (!isValidTime(value)) {
+      return null;
+    }
+
+    const [hours, minutes] = value.split(":").map(Number);
+    return hours * minutesPerHour + minutes;
+  };
+
+  const parseTimeRange = (value) => {
+    const [startRaw, endRaw] = String(value || "").split("~").map((part) => normalizeTime(part));
+    const startMinutes = parseTimeToMinutes(startRaw);
+    const endMinutes = parseTimeToMinutes(endRaw);
+
+    if (startMinutes === null || endMinutes === null) {
+      return null;
+    }
+
+    return {
+      startLabel: startRaw,
+      endLabel: endRaw,
+      startMinutes,
+      endMinutes: endMinutes > startMinutes ? endMinutes : startMinutes + 30,
+    };
+  };
+
+  const renderScheduleBoard = (groupedEntries) => {
+    if (!boardElement) {
+      return;
+    }
+
+    const dates = Object.keys(groupedEntries);
+
+    if (!dates.length) {
+      boardElement.innerHTML = "<p class='schedule-board-empty'>등록된 일정이 아직 없습니다. 일정을 추가하면 시간표가 여기에 표시됩니다.</p>";
+      return;
+    }
+
+    const hourLabels = Array.from({ length: boardEndHour - boardStartHour + 1 }, (_, index) => {
+      const hour = boardStartHour + index;
+      return `${`${hour}`.padStart(2, "0")}:00`;
+    });
+
+    const headerMarkup = dates
+      .map((date, index) => {
+        const dayItems = groupedEntries[date];
+        return `
+          <div class="schedule-board-day" style="grid-column: ${index + 2}; grid-row: 1;">
+            <strong>${escapeHtml(dayItems[0].day_label || getDayLabel(date))}</strong>
+            <span>${escapeHtml(formatDate(date))}</span>
+          </div>
+        `;
+      })
+      .join("");
+
+    const timeColumnMarkup = hourLabels
+      .map((label, index) => `<div class="schedule-board-time" style="grid-column: 1; grid-row: ${index + 2};">${label}</div>`)
+      .join("");
+
+    const dayColumnsMarkup = dates
+      .map((date, index) => {
+        const dayItems = groupedEntries[date];
+        const eventMarkup = dayItems
+          .map((item) => {
+            const timeRange = parseTimeRange(item.time);
+            if (!timeRange) {
+              return "";
+            }
+
+            const clampedStart = Math.max(timeRange.startMinutes, boardStartHour * minutesPerHour);
+            const clampedEnd = Math.min(timeRange.endMinutes, boardEndHour * minutesPerHour);
+
+            if (clampedEnd <= clampedStart) {
+              return "";
+            }
+
+            const top = ((clampedStart - boardStartHour * minutesPerHour) / totalBoardMinutes) * 100;
+            const height = ((clampedEnd - clampedStart) / totalBoardMinutes) * 100;
+            const itemLines = Array.isArray(item.items) ? item.items : [];
+
+            return `
+              <article class="schedule-board-event" style="top: ${top}%; height: ${height}%;">
+                <span class="schedule-board-event-time">${escapeHtml(`${timeRange.startLabel} - ${timeRange.endLabel}`)}</span>
+                <strong>${escapeHtml(item.title)}</strong>
+                ${itemLines.length ? `<ul>${itemLines.map((entry) => `<li>${escapeHtml(entry)}</li>`).join("")}</ul>` : ""}
+              </article>
+            `;
+          })
+          .join("");
+
+        return `<div class="schedule-board-column" style="grid-column: ${index + 2}; grid-row: 2 / span 24;">${eventMarkup}</div>`;
+      })
+      .join("");
+
+    boardElement.innerHTML = `
+      <div class="schedule-board-grid" style="--day-count: ${dates.length};">
+        <div class="schedule-board-corner" style="grid-column: 1; grid-row: 1;"></div>
+        ${headerMarkup}
+        ${timeColumnMarkup}
+        ${dayColumnsMarkup}
+      </div>
+    `;
+  };
+
   const setLoadingState = (isLoading) => {
     const submitButton = form?.querySelector("button[type='submit']");
     if (submitButton) {
@@ -287,6 +405,7 @@ if (currentPage === "schedule") {
   };
 
   const renderSchedule = () => {
+    renderScheduleBoard({});
     if (!scheduleItems.length) {
       listElement.innerHTML = "<p class='budget-empty'>등록된 일정이 없습니다. 첫 일정을 추가해보세요.</p>";
       return;
@@ -337,6 +456,8 @@ if (currentPage === "schedule") {
         </article>
       `)
       .join("");
+
+    renderScheduleBoard(groupedByDate);
   };
 
   const loadSchedule = async () => {
