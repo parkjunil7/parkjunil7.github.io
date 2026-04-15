@@ -5,7 +5,6 @@ const hrefMap = {
   schedule: "schedule.html",
   details: "details.html",
   budget: "budget.html",
-  links: "links.html",
 };
 
 const isValidTime = (value) => /^([01]\d|2[0-3]):([0-5]\d)$/.test(value);
