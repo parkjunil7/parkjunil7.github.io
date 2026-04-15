@@ -751,6 +751,18 @@ body[data-page="details"] .page-header h1 {
   overflow: hidden;
 }
 
+.schedule-board-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.schedule-zoom-button {
+  min-height: 42px;
+  padding: 0 14px;
+}
+
 .schedule-board {
   overflow-x: auto;
   overflow-y: hidden;
@@ -766,6 +778,8 @@ body[data-page="details"] .page-header h1 {
   --time-column-width: 84px;
   --day-column-width: 220px;
   --hour-row-height: 64px;
+  transform-origin: top left;
+  transition: transform 160ms ease;
   display: grid;
   grid-template-columns: var(--time-column-width) repeat(var(--day-count, 1), var(--day-column-width));
   grid-template-rows: 72px repeat(24, var(--hour-row-height));

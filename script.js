@@ -506,6 +506,9 @@ if (currentPage === "schedule") {
   const form = document.getElementById("schedule-form");
   const listElement = document.getElementById("schedule-list");
   const boardElement = document.getElementById("schedule-board");
+  const zoomInButton = document.getElementById("schedule-zoom-in");
+  const zoomOutButton = document.getElementById("schedule-zoom-out");
+  const zoomResetButton = document.getElementById("schedule-zoom-reset");
   const resetButton = document.getElementById("schedule-reset");
   const setupNotice = document.getElementById("schedule-setup-notice");
   const supabaseConfig = window.SUPABASE_CONFIG || {};
@@ -513,10 +516,13 @@ if (currentPage === "schedule") {
   const supabaseAnonKey = supabaseConfig.anonKey || "";
   let scheduleItems = [];
   let supabaseClient = null;
+  let boardZoom = 1;
   const boardStartHour = 1;
   const boardEndHour = 24;
   const minutesPerHour = 60;
   const totalBoardMinutes = 24 * minutesPerHour;
+  const minBoardZoom = 0.85;
+  const maxBoardZoom = 1.8;
 
   const formatDate = (value) => {
     const date = new Date(value);
@@ -643,6 +649,12 @@ if (currentPage === "schedule") {
         ${dayColumnsMarkup}
       </div>
     `;
+
+    const boardGrid = boardElement.querySelector(".schedule-board-grid");
+    if (boardGrid) {
+      boardGrid.style.transform = `scale(${boardZoom})`;
+      boardGrid.style.marginBottom = `${(boardZoom - 1) * (24 * 64 + 72)}px`;
+    }
   };
 
   const setLoadingState = (isLoading) => {
@@ -653,6 +665,16 @@ if (currentPage === "schedule") {
     if (resetButton) {
       resetButton.disabled = isLoading;
     }
+  };
+
+  const updateBoardZoom = (nextZoom) => {
+    boardZoom = Math.min(maxBoardZoom, Math.max(minBoardZoom, nextZoom));
+    const boardGrid = boardElement?.querySelector(".schedule-board-grid");
+    if (!boardGrid) {
+      return;
+    }
+    boardGrid.style.transform = `scale(${boardZoom})`;
+    boardGrid.style.marginBottom = `${(boardZoom - 1) * (24 * 64 + 72)}px`;
   };
 
   const renderSchedule = () => {
@@ -830,6 +852,18 @@ if (currentPage === "schedule") {
     };
 
     resetSchedule();
+  });
+
+  zoomInButton?.addEventListener("click", () => {
+    updateBoardZoom(boardZoom + 0.15);
+  });
+
+  zoomOutButton?.addEventListener("click", () => {
+    updateBoardZoom(boardZoom - 0.15);
+  });
+
+  zoomResetButton?.addEventListener("click", () => {
+    updateBoardZoom(1);
   });
 
   if (!supabaseUrl || !supabaseAnonKey || !window.supabase?.createClient) {
