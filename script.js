@@ -585,10 +585,10 @@ if (currentPage === "schedule") {
     });
 
     const headerMarkup = dates
-      .map((date, index) => {
+      .map((date) => {
         const dayItems = groupedEntries[date];
         return `
-          <div class="schedule-board-day" style="grid-column: ${index + 2}; grid-row: 1;">
+          <div class="schedule-board-day">
             <strong>${escapeHtml(dayItems[0].day_label || getDayLabel(date))}</strong>
             <span>${escapeHtml(formatDate(date))}</span>
           </div>
@@ -597,11 +597,11 @@ if (currentPage === "schedule") {
       .join("");
 
     const timeColumnMarkup = hourLabels
-      .map((label, index) => `<div class="schedule-board-time" style="grid-column: 1; grid-row: ${index + 2};">${label}</div>`)
+      .map((label) => `<div class="schedule-board-time">${label}</div>`)
       .join("");
 
     const dayColumnsMarkup = dates
-      .map((date, index) => {
+      .map((date) => {
         const dayItems = groupedEntries[date];
         const eventMarkup = dayItems
           .map((item) => {
@@ -631,18 +631,66 @@ if (currentPage === "schedule") {
           })
           .join("");
 
-        return `<div class="schedule-board-column" style="grid-column: ${index + 2}; grid-row: 2 / span 24;">${eventMarkup}</div>`;
+        return `<div class="schedule-board-column">${eventMarkup}</div>`;
       })
       .join("");
 
     boardElement.innerHTML = `
-      <div class="schedule-board-grid" style="--day-count: ${dates.length};">
-        <div class="schedule-board-corner" style="grid-column: 1; grid-row: 1;"></div>
-        ${headerMarkup}
-        ${timeColumnMarkup}
-        ${dayColumnsMarkup}
+      <div class="schedule-board-shell">
+        <div class="schedule-board-corner"></div>
+        <div class="schedule-board-header-scroll">
+          <div class="schedule-board-header-grid" style="--day-count: ${dates.length};">
+            ${headerMarkup}
+          </div>
+        </div>
+        <div class="schedule-board-time-scroll">
+          <div class="schedule-board-time-grid">
+            ${timeColumnMarkup}
+          </div>
+        </div>
+        <div class="schedule-board-body-scroll">
+          <div class="schedule-board-grid" style="--day-count: ${dates.length};">
+            ${dayColumnsMarkup}
+          </div>
+        </div>
       </div>
     `;
+
+    const headerScroll = boardElement.querySelector(".schedule-board-header-scroll");
+    const timeScroll = boardElement.querySelector(".schedule-board-time-scroll");
+    const bodyScroll = boardElement.querySelector(".schedule-board-body-scroll");
+
+    if (headerScroll && timeScroll && bodyScroll) {
+      let isSyncing = false;
+
+      bodyScroll.addEventListener("scroll", () => {
+        if (isSyncing) {
+          return;
+        }
+        isSyncing = true;
+        headerScroll.scrollLeft = bodyScroll.scrollLeft;
+        timeScroll.scrollTop = bodyScroll.scrollTop;
+        isSyncing = false;
+      });
+
+      headerScroll.addEventListener("scroll", () => {
+        if (isSyncing) {
+          return;
+        }
+        isSyncing = true;
+        bodyScroll.scrollLeft = headerScroll.scrollLeft;
+        isSyncing = false;
+      });
+
+      timeScroll.addEventListener("scroll", () => {
+        if (isSyncing) {
+          return;
+        }
+        isSyncing = true;
+        bodyScroll.scrollTop = timeScroll.scrollTop;
+        isSyncing = false;
+      });
+    }
 
   };
 
