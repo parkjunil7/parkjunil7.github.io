@@ -500,7 +500,7 @@ if (currentPage === "details") {
   }
 }
 
-if (currentPage === "schedule") {
+if (false && currentPage === "schedule") {
   const tripStartDate = "2026-04-30";
   const form = document.getElementById("schedule-form");
   const listElement = document.getElementById("schedule-list");
@@ -879,6 +879,507 @@ if (currentPage === "schedule") {
 
     resetSchedule();
   });
+
+  if (!supabaseUrl || !supabaseAnonKey || !window.supabase?.createClient) {
+    setupNotice?.classList.remove("is-hidden");
+    renderSchedule();
+  } else {
+    supabaseClient = window.supabase.createClient(supabaseUrl, supabaseAnonKey);
+    loadSchedule();
+
+    supabaseClient
+      .channel("public:itinerary_items")
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "itinerary_items",
+        },
+        () => {
+          loadSchedule();
+        }
+      )
+      .subscribe();
+  }
+}
+
+if (currentPage === "schedule") {
+  const tripStartDate = "2026-04-30";
+  const form = document.getElementById("schedule-form");
+  const listElement = document.getElementById("schedule-list");
+  const boardElement = document.getElementById("schedule-board");
+  const resetButton = document.getElementById("schedule-reset");
+  const setupNotice = document.getElementById("schedule-setup-notice");
+  const cancelEditButton = document.getElementById("schedule-cancel-edit");
+  const supabaseConfig = window.SUPABASE_CONFIG || {};
+  const supabaseUrl = supabaseConfig.url || "";
+  const supabaseAnonKey = supabaseConfig.anonKey || "";
+  let scheduleItems = [];
+  let supabaseClient = null;
+  const boardStartHour = 1;
+  const boardEndHour = 24;
+  const minutesPerHour = 60;
+  const totalBoardMinutes = 24 * minutesPerHour;
+
+  const formatDate = (value) => {
+    const date = new Date(value);
+    const month = `${date.getMonth() + 1}`.padStart(2, "0");
+    const day = `${date.getDate()}`.padStart(2, "0");
+    const weekday = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"][date.getDay()];
+    return `${month}.${day} ${weekday}`;
+  };
+
+  const getDayLabel = (value) => {
+    const start = new Date(tripStartDate);
+    const current = new Date(value);
+    const diff = Math.round((current - start) / (1000 * 60 * 60 * 24));
+    return `DAY ${diff + 1}`;
+  };
+
+  const escapeHtml = (value) =>
+    String(value ?? "")
+      .replaceAll("&", "&amp;")
+      .replaceAll("<", "&lt;")
+      .replaceAll(">", "&gt;")
+      .replaceAll('"', "&quot;")
+      .replaceAll("'", "&#39;");
+
+  const getSubmitButton = () => form?.querySelector("button[type='submit']");
+
+  const parseTimeToMinutes = (value) => {
+    if (!isValidTime(value)) {
+      return null;
+    }
+
+    const [hours, minutes] = value.split(":").map(Number);
+    return hours * minutesPerHour + minutes;
+  };
+
+  const parseTimeRange = (value) => {
+    const [startRaw, endRaw] = String(value || "").split("~").map((part) => normalizeTime(part));
+    const startMinutes = parseTimeToMinutes(startRaw);
+    const endMinutes = parseTimeToMinutes(endRaw);
+
+    if (startMinutes === null || endMinutes === null) {
+      return null;
+    }
+
+    return {
+      startLabel: startRaw,
+      endLabel: endRaw,
+      startMinutes,
+      endMinutes: endMinutes > startMinutes ? endMinutes : startMinutes + 30,
+    };
+  };
+
+  const setEditMode = (item = null) => {
+    if (!form) {
+      return;
+    }
+
+    const scheduleIdField = form.elements.namedItem("scheduleId");
+    const dateField = form.elements.namedItem("date");
+    const startField = form.elements.namedItem("startTime");
+    const endField = form.elements.namedItem("endTime");
+    const titleField = form.elements.namedItem("title");
+    const itemsField = form.elements.namedItem("items");
+    const submitButton = getSubmitButton();
+
+    if (
+      !(scheduleIdField instanceof HTMLInputElement) ||
+      !(dateField instanceof HTMLInputElement) ||
+      !(startField instanceof HTMLInputElement) ||
+      !(endField instanceof HTMLInputElement) ||
+      !(titleField instanceof HTMLInputElement) ||
+      !(itemsField instanceof HTMLTextAreaElement)
+    ) {
+      return;
+    }
+
+    if (!item) {
+      form.reset();
+      scheduleIdField.value = "";
+      if (submitButton) {
+        submitButton.textContent = "일정 추가";
+      }
+      cancelEditButton?.classList.add("is-hidden");
+      return;
+    }
+
+    const timeRange = parseTimeRange(item.time);
+    scheduleIdField.value = String(item.id);
+    dateField.value = item.date || "";
+    startField.value = timeRange?.startLabel || "";
+    endField.value = timeRange?.endLabel || "";
+    titleField.value = item.title || "";
+    itemsField.value = Array.isArray(item.items) ? item.items.join("\n") : "";
+    if (submitButton) {
+      submitButton.textContent = "일정 수정";
+    }
+    cancelEditButton?.classList.remove("is-hidden");
+    form.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
+
+  const renderScheduleBoard = (groupedEntries) => {
+    if (!boardElement) {
+      return;
+    }
+
+    const dates = Object.keys(groupedEntries);
+
+    if (!dates.length) {
+      boardElement.innerHTML =
+        "<p class='schedule-board-empty'>등록된 일정이 아직 없습니다. 일정을 추가하면 시간표가 여기에 표시됩니다.</p>";
+      return;
+    }
+
+    const hourLabels = Array.from({ length: boardEndHour - boardStartHour + 1 }, (_, index) => {
+      const hour = boardStartHour + index;
+      return `${`${hour}`.padStart(2, "0")}:00`;
+    });
+
+    const headerMarkup = dates
+      .map((date) => {
+        const dayItems = groupedEntries[date];
+        return `
+          <div class="schedule-board-day">
+            <strong>${escapeHtml(dayItems[0].day_label || getDayLabel(date))}</strong>
+            <span>${escapeHtml(formatDate(date))}</span>
+          </div>
+        `;
+      })
+      .join("");
+
+    const timeColumnMarkup = hourLabels
+      .map((label) => `<div class="schedule-board-time">${label}</div>`)
+      .join("");
+
+    const dayColumnsMarkup = dates
+      .map((date) => {
+        const dayItems = groupedEntries[date];
+        const eventMarkup = dayItems
+          .map((item) => {
+            const timeRange = parseTimeRange(item.time);
+            if (!timeRange) {
+              return "";
+            }
+
+            const clampedStart = Math.max(timeRange.startMinutes, boardStartHour * minutesPerHour);
+            const clampedEnd = Math.min(timeRange.endMinutes, boardEndHour * minutesPerHour);
+
+            if (clampedEnd <= clampedStart) {
+              return "";
+            }
+
+            const top = ((clampedStart - boardStartHour * minutesPerHour) / totalBoardMinutes) * 100;
+            const height = ((clampedEnd - clampedStart) / totalBoardMinutes) * 100;
+            const itemLines = Array.isArray(item.items) ? item.items : [];
+
+            return `
+              <article class="schedule-board-event" style="top: ${top}%; height: ${height}%;">
+                <span class="schedule-board-event-time">${escapeHtml(`${timeRange.startLabel} - ${timeRange.endLabel}`)}</span>
+                <strong>${escapeHtml(item.title)}</strong>
+                ${itemLines.length ? `<ul>${itemLines.map((entry) => `<li>${escapeHtml(entry)}</li>`).join("")}</ul>` : ""}
+              </article>
+            `;
+          })
+          .join("");
+
+        return `<div class="schedule-board-column">${eventMarkup}</div>`;
+      })
+      .join("");
+
+    boardElement.innerHTML = `
+      <div class="schedule-board-shell">
+        <div class="schedule-board-corner"></div>
+        <div class="schedule-board-header-scroll">
+          <div class="schedule-board-header-grid" style="--day-count: ${dates.length};">
+            ${headerMarkup}
+          </div>
+        </div>
+        <div class="schedule-board-time-scroll">
+          <div class="schedule-board-time-grid">
+            ${timeColumnMarkup}
+          </div>
+        </div>
+        <div class="schedule-board-body-scroll">
+          <div class="schedule-board-grid" style="--day-count: ${dates.length};">
+            ${dayColumnsMarkup}
+          </div>
+        </div>
+      </div>
+    `;
+
+    const headerScroll = boardElement.querySelector(".schedule-board-header-scroll");
+    const timeScroll = boardElement.querySelector(".schedule-board-time-scroll");
+    const bodyScroll = boardElement.querySelector(".schedule-board-body-scroll");
+
+    if (headerScroll && timeScroll && bodyScroll) {
+      let isSyncing = false;
+
+      bodyScroll.addEventListener("scroll", () => {
+        if (isSyncing) {
+          return;
+        }
+        isSyncing = true;
+        headerScroll.scrollLeft = bodyScroll.scrollLeft;
+        timeScroll.scrollTop = bodyScroll.scrollTop;
+        isSyncing = false;
+      });
+
+      headerScroll.addEventListener("scroll", () => {
+        if (isSyncing) {
+          return;
+        }
+        isSyncing = true;
+        bodyScroll.scrollLeft = headerScroll.scrollLeft;
+        isSyncing = false;
+      });
+
+      timeScroll.addEventListener("scroll", () => {
+        if (isSyncing) {
+          return;
+        }
+        isSyncing = true;
+        bodyScroll.scrollTop = timeScroll.scrollTop;
+        isSyncing = false;
+      });
+    }
+  };
+
+  const setLoadingState = (isLoading) => {
+    const submitButton = getSubmitButton();
+    if (submitButton) {
+      submitButton.disabled = isLoading;
+    }
+    if (resetButton) {
+      resetButton.disabled = isLoading;
+    }
+    if (cancelEditButton) {
+      cancelEditButton.disabled = isLoading;
+    }
+  };
+
+  const renderSchedule = () => {
+    renderScheduleBoard({});
+
+    if (!listElement) {
+      return;
+    }
+
+    if (!scheduleItems.length) {
+      listElement.innerHTML = "<p class='budget-empty'>등록된 일정이 없습니다. 첫 일정을 추가해보세요.</p>";
+      return;
+    }
+
+    const sortedDates = [...scheduleItems].sort((a, b) => {
+      const dateDiff = new Date(a.date) - new Date(b.date);
+      if (dateDiff !== 0) {
+        return dateDiff;
+      }
+      return getTimeSortValue(a.time).localeCompare(getTimeSortValue(b.time));
+    });
+
+    const groupedByDate = sortedDates.reduce((acc, item) => {
+      if (!acc[item.date]) {
+        acc[item.date] = [];
+      }
+      acc[item.date].push(item);
+      return acc;
+    }, {});
+
+    listElement.innerHTML = Object.entries(groupedByDate)
+      .map(([date, items]) => `
+        <article class="timeline-day timeline-group">
+          <div class="timeline-date">
+            <span>${escapeHtml(items[0].day_label)}</span>
+            <strong>${escapeHtml(formatDate(date))}</strong>
+          </div>
+          <div class="timeline-body">
+            ${items
+              .map(
+                (item) => `
+                  <section class="timeline-entry">
+                    <div class="timeline-body-head">
+                      <h2>${escapeHtml(item.title)}</h2>
+                      <div class="timeline-actions">
+                        <button type="button" class="button secondary timeline-edit" data-id="${item.id}">수정</button>
+                        <button type="button" class="button secondary timeline-delete" data-id="${item.id}">삭제</button>
+                      </div>
+                    </div>
+                    <span class="timeline-time">${escapeHtml(item.time || "--:--")}</span>
+                    <ul>
+                      ${(Array.isArray(item.items) ? item.items : [])
+                        .map((entry) => `<li>${escapeHtml(entry)}</li>`)
+                        .join("")}
+                    </ul>
+                  </section>
+                `
+              )
+              .join("")}
+          </div>
+        </article>
+      `)
+      .join("");
+
+    renderScheduleBoard(groupedByDate);
+  };
+
+  const loadSchedule = async () => {
+    if (!supabaseClient) {
+      return;
+    }
+
+    const { data, error } = await supabaseClient
+      .from("itinerary_items")
+      .select("id, date, day_label, title, time, items, created_at")
+      .order("date", { ascending: true })
+      .order("time", { ascending: true });
+
+    if (error) {
+      if (listElement) {
+        listElement.innerHTML =
+          "<p class='budget-empty'>일정표를 불러오지 못했습니다. Supabase 설정을 확인해주세요.</p>";
+      }
+      return;
+    }
+
+    scheduleItems = data || [];
+    renderSchedule();
+  };
+
+  form?.addEventListener("submit", (event) => {
+    event.preventDefault();
+
+    if (!supabaseClient || !form) {
+      return;
+    }
+
+    const submit = async () => {
+      const formData = new FormData(form);
+      const scheduleId = String(formData.get("scheduleId") || "").trim();
+      const date = String(formData.get("date") || "").trim();
+      const startTime = String(formData.get("startTime") || "").trim();
+      const endTime = String(formData.get("endTime") || "").trim();
+      const title = String(formData.get("title") || "").trim();
+      const items = String(formData.get("items") || "")
+        .split("\n")
+        .map((item) => item.trim())
+        .filter(Boolean);
+      const normalizedStartTime = normalizeTime(startTime);
+      const normalizedEndTime = normalizeTime(endTime);
+      const time =
+        normalizedStartTime && normalizedEndTime ? `${normalizedStartTime}~${normalizedEndTime}` : "";
+
+      if (!date || !title || !startTime || !endTime || !items.length) {
+        alert("날짜, 시간, 제목, 내용을 모두 입력해주세요.");
+        return;
+      }
+
+      if (!isValidTime(normalizedStartTime) || !isValidTime(normalizedEndTime)) {
+        alert("시간은 24시간 형식으로 입력해주세요. 예: 07:45");
+        return;
+      }
+
+      const payload = {
+        date,
+        day_label: getDayLabel(date),
+        title,
+        time,
+        items,
+      };
+
+      setLoadingState(true);
+      const { error } = scheduleId
+        ? await supabaseClient.from("itinerary_items").update(payload).eq("id", scheduleId)
+        : await supabaseClient.from("itinerary_items").insert(payload);
+      setLoadingState(false);
+
+      if (error) {
+        alert(`일정 저장에 실패했습니다: ${error.message}`);
+        return;
+      }
+
+      setEditMode(null);
+      await loadSchedule();
+    };
+
+    submit();
+  });
+
+  listElement?.addEventListener("click", (event) => {
+    const target = event.target;
+    if (!(target instanceof HTMLElement) || !supabaseClient) {
+      return;
+    }
+
+    const trigger = target.closest(".timeline-edit, .timeline-delete");
+    if (!(trigger instanceof HTMLElement)) {
+      return;
+    }
+
+    const { id } = trigger.dataset;
+    if (!id) {
+      return;
+    }
+
+    if (trigger.classList.contains("timeline-edit")) {
+      const selectedItem = scheduleItems.find((item) => String(item.id) === id);
+      if (selectedItem) {
+        setEditMode(selectedItem);
+      }
+      return;
+    }
+
+    const removeSchedule = async () => {
+      setLoadingState(true);
+      const { error } = await supabaseClient.from("itinerary_items").delete().eq("id", id);
+      setLoadingState(false);
+
+      if (error) {
+        alert(`일정 삭제에 실패했습니다: ${error.message}`);
+        return;
+      }
+
+      const editingId = form?.elements.namedItem("scheduleId");
+      if (editingId instanceof HTMLInputElement && editingId.value === id) {
+        setEditMode(null);
+      }
+
+      await loadSchedule();
+    };
+
+    removeSchedule();
+  });
+
+  cancelEditButton?.addEventListener("click", () => {
+    setEditMode(null);
+  });
+
+  resetButton?.addEventListener("click", () => {
+    if (!supabaseClient) {
+      return;
+    }
+
+    const resetSchedule = async () => {
+      setLoadingState(true);
+      const { error } = await supabaseClient.from("itinerary_items").delete().gte("id", 0);
+      setLoadingState(false);
+
+      if (error) {
+        alert(`전체 초기화에 실패했습니다: ${error.message}`);
+        return;
+      }
+
+      setEditMode(null);
+      await loadSchedule();
+    };
+
+    resetSchedule();
+  });
+
+  setEditMode(null);
 
   if (!supabaseUrl || !supabaseAnonKey || !window.supabase?.createClient) {
     setupNotice?.classList.remove("is-hidden");

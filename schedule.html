@@ -40,7 +40,7 @@
           <h2>일정표 테이블 생성 필요</h2>
         </div>
         <p class="setup-copy">
-          Supabase에 `itinerary_items` 테이블을 만든 뒤 다시 열면 공용 일정표 입력이 바로 동작합니다.
+          Supabase에 <code>itinerary_items</code> 테이블을 만든 뒤 다시 열면 공용 일정표 입력이 바로 동작합니다.
         </p>
       </section>
 
@@ -51,6 +51,8 @@
             <h2>일정 등록</h2>
           </div>
           <form id="schedule-form" class="budget-form">
+            <input type="hidden" name="scheduleId">
+
             <label class="form-field">
               <span>날짜</span>
               <input type="date" name="date" required>
@@ -75,7 +77,10 @@
               <textarea name="items" rows="5" placeholder="한 줄에 하나씩 입력하세요&#10;예: 인천(ICN) 출발&#10;쿤밍(KMG) 도착" required></textarea>
             </label>
 
-            <button type="submit" class="button primary budget-submit">일정 추가</button>
+            <div class="schedule-form-actions">
+              <button type="submit" class="button primary budget-submit">일정 추가</button>
+              <button type="button" id="schedule-cancel-edit" class="button secondary budget-reset is-hidden">수정 취소</button>
+            </div>
           </form>
         </article>
       </section>
@@ -102,6 +107,6 @@
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="supabase-config.js"></script>
-  <script src="script.js?v=20260415-10"></script>
+  <script src="script.js?v=20260416-2"></script>
 </body>
 </html>
