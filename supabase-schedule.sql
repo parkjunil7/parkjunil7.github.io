@@ -22,6 +22,13 @@ for insert
 to anon
 with check (true);
 
+create policy "Public can update itinerary items"
+on public.itinerary_items
+for update
+to anon
+using (true)
+with check (true);
+
 create policy "Public can delete itinerary items"
 on public.itinerary_items
 for delete
