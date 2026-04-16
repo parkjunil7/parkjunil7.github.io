@@ -185,6 +185,26 @@ main {
   color: rgba(12, 79, 104, 0.8);
 }
 
+.hero-dday {
+  display: inline-grid;
+  gap: 6px;
+  margin-top: 22px;
+}
+
+.hero-dday-label {
+  color: rgba(12, 79, 104, 0.72);
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.hero-dday strong {
+  font-family: "Space Grotesk", sans-serif;
+  font-size: clamp(1.6rem, 3vw, 2.4rem);
+  line-height: 1;
+}
+
 .hero-actions {
   display: flex;
   flex-wrap: wrap;

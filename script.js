@@ -9,10 +9,26 @@ const hrefMap = {
 
 const isValidTime = (value) => /^([01]\d|2[0-3]):([0-5]\d)$/.test(value);
 const normalizeTime = (value) => String(value || "").trim();
+const departureDate = "2026-04-30";
 const getTimeSortValue = (value) => {
   const normalized = normalizeTime(value);
   const [start] = normalized.split("~");
   return isValidTime(start) ? start : "99:99";
+};
+
+const getHomeDdayLabel = () => {
+  const today = new Date();
+  const currentDate = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+  const targetDate = new Date(`${departureDate}T00:00:00`);
+  const diff = Math.round((targetDate - currentDate) / (1000 * 60 * 60 * 24));
+
+  if (diff > 0) {
+    return `D-${diff}`;
+  }
+  if (diff === 0) {
+    return "D-Day";
+  }
+  return `D+${Math.abs(diff)}`;
 };
 
 window.addEventListener("error", (event) => {
@@ -30,6 +46,14 @@ document.querySelectorAll(".nav a").forEach((link) => {
     link.classList.add("active");
   }
 });
+
+if (currentPage === "home") {
+  const homeDdayValueElement = document.getElementById("home-dday-value");
+
+  if (homeDdayValueElement) {
+    homeDdayValueElement.textContent = getHomeDdayLabel();
+  }
+}
 
 if (currentPage === "budget") {
   const travelerCount = 2;
