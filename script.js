@@ -3,6 +3,7 @@ const currentPage = document.body.dataset.page;
 const hrefMap = {
   home: "index.html",
   schedule: "schedule.html",
+  records: "records.html",
   details: "details.html",
   budget: "budget.html",
 };
@@ -1471,6 +1472,593 @@ if (currentPage === "schedule") {
         },
         () => {
           loadSchedule();
+        }
+      )
+      .subscribe();
+  }
+}
+
+if (currentPage === "records") {
+  const tripStartDate = "2026-04-30";
+  const recordListElement = document.getElementById("record-list");
+  const setupNotice = document.getElementById("records-setup-notice");
+  const supabaseConfig = window.SUPABASE_CONFIG || {};
+  const supabaseUrl = supabaseConfig.url || "";
+  const supabaseAnonKey = supabaseConfig.anonKey || "";
+  const recordBucket = "travel-records";
+  const maxUploadWidth = 1600;
+  const maxUploadHeight = 1600;
+  const targetUploadBytes = 700 * 1024;
+  let scheduleItems = [];
+  let recordPhotos = [];
+  let activeViewerItineraryId = "";
+  let activeViewerIndex = 0;
+  let supabaseClient = null;
+
+  const escapeHtml = (value) =>
+    String(value ?? "")
+      .replaceAll("&", "&amp;")
+      .replaceAll("<", "&lt;")
+      .replaceAll(">", "&gt;")
+      .replaceAll('"', "&quot;")
+      .replaceAll("'", "&#39;");
+
+  const formatDate = (value) => {
+    const date = new Date(value);
+    const month = `${date.getMonth() + 1}`.padStart(2, "0");
+    const day = `${date.getDate()}`.padStart(2, "0");
+    const weekday = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"][date.getDay()];
+    return `${month}.${day} ${weekday}`;
+  };
+
+  const getDayLabel = (value) => {
+    const start = new Date(tripStartDate);
+    const current = new Date(value);
+    const diff = Math.round((current - start) / (1000 * 60 * 60 * 24));
+    return `DAY ${diff}`;
+  };
+
+  const sanitizeFileName = (value) =>
+    String(value || "photo")
+      .toLowerCase()
+      .replace(/[^a-z0-9._-]+/g, "-")
+      .replace(/-+/g, "-")
+      .replace(/^-|-$/g, "");
+
+  const ensureViewer = () => {
+    let viewer = document.getElementById("record-photo-viewer");
+    if (viewer) {
+      return viewer;
+    }
+
+    viewer = document.createElement("div");
+    viewer.id = "record-photo-viewer";
+    viewer.className = "record-viewer is-hidden";
+    viewer.innerHTML = `
+      <div class="record-viewer-backdrop" data-viewer-close="true"></div>
+      <div class="record-viewer-dialog">
+        <button type="button" class="record-viewer-close" data-viewer-close="true" aria-label="닫기">×</button>
+        <button type="button" class="record-viewer-nav record-viewer-prev" data-viewer-step="-1" aria-label="이전">‹</button>
+        <figure class="record-viewer-figure">
+          <img id="record-viewer-image" src="" alt="">
+          <figcaption id="record-viewer-caption" class="record-viewer-caption"></figcaption>
+        </figure>
+        <button type="button" class="record-viewer-nav record-viewer-next" data-viewer-step="1" aria-label="다음">›</button>
+      </div>
+    `;
+    document.body.appendChild(viewer);
+    return viewer;
+  };
+
+  const getPhotosForItinerary = (itineraryId) =>
+    recordPhotos.filter((photo) => String(photo.itinerary_id) === String(itineraryId));
+
+  const updateViewer = () => {
+    const viewer = ensureViewer();
+    const photos = getPhotosForItinerary(activeViewerItineraryId);
+    const imageElement = viewer.querySelector("#record-viewer-image");
+    const captionElement = viewer.querySelector("#record-viewer-caption");
+    const prevButton = viewer.querySelector(".record-viewer-prev");
+    const nextButton = viewer.querySelector(".record-viewer-next");
+
+    if (!(imageElement instanceof HTMLImageElement) || !(captionElement instanceof HTMLElement)) {
+      return;
+    }
+
+    if (!photos.length) {
+      viewer.classList.add("is-hidden");
+      return;
+    }
+
+    const safeIndex = ((activeViewerIndex % photos.length) + photos.length) % photos.length;
+    activeViewerIndex = safeIndex;
+    const photo = photos[safeIndex];
+    imageElement.src = photo.image_url;
+    imageElement.alt = photo.caption || "여행 사진";
+    captionElement.textContent = `${photo.caption || "여행 기록"} · ${safeIndex + 1}/${photos.length}`;
+
+    if (prevButton instanceof HTMLButtonElement) {
+      prevButton.disabled = photos.length < 2;
+    }
+    if (nextButton instanceof HTMLButtonElement) {
+      nextButton.disabled = photos.length < 2;
+    }
+  };
+
+  const openViewer = (itineraryId, index) => {
+    activeViewerItineraryId = String(itineraryId);
+    activeViewerIndex = index;
+    const viewer = ensureViewer();
+    viewer.classList.remove("is-hidden");
+    document.body.classList.add("viewer-open");
+    updateViewer();
+  };
+
+  const closeViewer = () => {
+    const viewer = document.getElementById("record-photo-viewer");
+    if (!viewer) {
+      return;
+    }
+    viewer.classList.add("is-hidden");
+    document.body.classList.remove("viewer-open");
+  };
+
+  const moveViewer = (step) => {
+    const photos = getPhotosForItinerary(activeViewerItineraryId);
+    if (photos.length < 2) {
+      return;
+    }
+    activeViewerIndex += step;
+    updateViewer();
+  };
+
+  const loadImageFile = (file) =>
+    new Promise((resolve, reject) => {
+      const objectUrl = URL.createObjectURL(file);
+      const image = new Image();
+      image.onload = () => {
+        URL.revokeObjectURL(objectUrl);
+        resolve(image);
+      };
+      image.onerror = () => {
+        URL.revokeObjectURL(objectUrl);
+        reject(new Error("이미지 파일을 읽을 수 없습니다."));
+      };
+      image.src = objectUrl;
+    });
+
+  const canvasToBlob = (canvas, type, quality) =>
+    new Promise((resolve, reject) => {
+      canvas.toBlob((blob) => {
+        if (blob) {
+          resolve(blob);
+          return;
+        }
+        reject(new Error("압축 이미지를 만들지 못했습니다."));
+      }, type, quality);
+    });
+
+  const compressImageFile = async (file) => {
+    if (!file.type.startsWith("image/")) {
+      return file;
+    }
+
+    const image = await loadImageFile(file);
+    const ratio = Math.min(1, maxUploadWidth / image.width, maxUploadHeight / image.height);
+    const width = Math.max(1, Math.round(image.width * ratio));
+    const height = Math.max(1, Math.round(image.height * ratio));
+    const canvas = document.createElement("canvas");
+    canvas.width = width;
+    canvas.height = height;
+
+    const context = canvas.getContext("2d");
+    if (!context) {
+      return file;
+    }
+
+    context.drawImage(image, 0, 0, width, height);
+
+    const outputType = file.type === "image/png" ? "image/png" : "image/jpeg";
+    let quality = outputType === "image/png" ? undefined : 0.86;
+    let compressedBlob = await canvasToBlob(canvas, outputType, quality);
+
+    if (outputType === "image/jpeg") {
+      while (compressedBlob.size > targetUploadBytes && typeof quality === "number" && quality > 0.5) {
+        quality = Math.max(0.5, quality - 0.08);
+        compressedBlob = await canvasToBlob(canvas, outputType, quality);
+      }
+    }
+
+    if (compressedBlob.size >= file.size) {
+      return file;
+    }
+
+    const extension = outputType === "image/png" ? "png" : "jpg";
+    const baseName = sanitizeFileName(file.name.replace(/\.[^.]+$/, "")) || "photo";
+    return new File([compressedBlob], `${baseName}.${extension}`, {
+      type: outputType,
+      lastModified: Date.now(),
+    });
+  };
+
+  const renderRecords = () => {
+    if (!recordListElement) {
+      return;
+    }
+
+    if (!scheduleItems.length) {
+      recordListElement.innerHTML =
+        "<p class='budget-empty'>등록된 일정이 아직 없습니다. 먼저 여행 일정표에서 일정을 추가해 주세요.</p>";
+      return;
+    }
+
+    const photosByItinerary = recordPhotos.reduce((acc, photo) => {
+      const key = String(photo.itinerary_id);
+      if (!acc[key]) {
+        acc[key] = [];
+      }
+      acc[key].push(photo);
+      return acc;
+    }, {});
+
+    const groupedByDate = scheduleItems.reduce((acc, item) => {
+      if (!acc[item.date]) {
+        acc[item.date] = [];
+      }
+      acc[item.date].push(item);
+      return acc;
+    }, {});
+
+    recordListElement.innerHTML = Object.entries(groupedByDate)
+      .map(([date, items]) => `
+        <article class="timeline-day timeline-group">
+          <div class="timeline-date">
+            <span>${escapeHtml(items[0].day_label || getDayLabel(date))}</span>
+            <strong>${escapeHtml(formatDate(date))}</strong>
+          </div>
+          <div class="timeline-body">
+            ${items
+              .map((item) => {
+                const photos = photosByItinerary[String(item.id)] || [];
+                const entries = Array.isArray(item.items) ? item.items : [];
+                return `
+                  <section class="timeline-entry record-entry">
+                    <div class="timeline-body-head">
+                      <div>
+                        <h2>${escapeHtml(item.title)}</h2>
+                        <span class="timeline-time">${escapeHtml(item.time || "--:--")}</span>
+                      </div>
+                    </div>
+                    ${entries.length ? `<ul>${entries.map((entry) => `<li>${escapeHtml(entry)}</li>`).join("")}</ul>` : ""}
+                    <form class="record-upload-form" data-itinerary-id="${item.id}">
+                      <label class="form-field">
+                        <span>사진 업로드</span>
+                        <input type="file" name="photo" accept="image/*" required>
+                      </label>
+                      <label class="form-field">
+                        <span>메모</span>
+                        <input type="text" name="caption" placeholder="예: 인천공항 근처 숙소 도착">
+                      </label>
+                      <button type="submit" class="button primary">사진 추가</button>
+                      <p class="record-upload-note">업로드 전에 긴 변 1600px, 약 700KB 이하를 목표로 자동 압축합니다.</p>
+                    </form>
+                    <div class="record-photo-gallery">
+                      ${
+                        photos.length
+                          ? `
+                              <div class="record-photo-slider-head">
+                                <strong>사진 ${photos.length}장</strong>
+                                ${
+                                  photos.length > 1
+                                    ? `
+                                        <div class="record-photo-nav">
+                                          <button type="button" class="button secondary record-photo-shift" data-direction="-1" data-itinerary-id="${item.id}">이전</button>
+                                          <button type="button" class="button secondary record-photo-shift" data-direction="1" data-itinerary-id="${item.id}">다음</button>
+                                        </div>
+                                      `
+                                    : ""
+                                }
+                              </div>
+                              <div class="record-photo-track" data-itinerary-id="${item.id}">
+                                ${photos
+                                  .map(
+                                    (photo, index) => `
+                                      <article class="record-photo-card">
+                                        <img
+                                          src="${escapeHtml(photo.image_url)}"
+                                          alt="${escapeHtml(photo.caption || item.title)}"
+                                          loading="lazy"
+                                          class="record-photo-open"
+                                          data-itinerary-id="${item.id}"
+                                          data-photo-index="${index}"
+                                        >
+                                        <div class="record-photo-copy">
+                                          <strong>${escapeHtml(photo.caption || item.title)}</strong>
+                                          <button type="button" class="button secondary record-photo-delete" data-photo-id="${photo.id}" data-storage-path="${escapeHtml(photo.storage_path)}">삭제</button>
+                                        </div>
+                                      </article>
+                                    `
+                                  )
+                                  .join("")}
+                              </div>
+                            `
+                          : "<p class='budget-empty'>아직 업로드된 사진이 없습니다. 첫 기록을 남겨보세요.</p>"
+                      }
+                    </div>
+                  </section>
+                `;
+              })
+              .join("")}
+          </div>
+        </article>
+      `)
+      .join("");
+  };
+
+  const loadRecords = async () => {
+    if (!supabaseClient) {
+      return;
+    }
+
+    const [scheduleResponse, photoResponse] = await Promise.all([
+      supabaseClient
+        .from("itinerary_items")
+        .select("id, date, day_label, title, time, items")
+        .order("date", { ascending: true })
+        .order("time", { ascending: true }),
+      supabaseClient
+        .from("travel_record_photos")
+        .select("id, itinerary_id, caption, image_url, storage_path, created_at")
+        .order("created_at", { ascending: false }),
+    ]);
+
+    if (scheduleResponse.error || photoResponse.error) {
+      setupNotice?.classList.remove("is-hidden");
+      recordListElement.innerHTML =
+        "<p class='budget-empty'>여행 기록 데이터를 불러오지 못했습니다. Supabase 테이블과 스토리지 설정을 확인해 주세요.</p>";
+      return;
+    }
+
+    scheduleItems = scheduleResponse.data || [];
+    recordPhotos = photoResponse.data || [];
+    renderRecords();
+  };
+
+  recordListElement?.addEventListener("submit", (event) => {
+    const target = event.target;
+    if (!(target instanceof HTMLFormElement) || !target.classList.contains("record-upload-form") || !supabaseClient) {
+      return;
+    }
+
+    event.preventDefault();
+
+    const itineraryId = String(target.dataset.itineraryId || "").trim();
+    const fileField = target.elements.namedItem("photo");
+    const captionField = target.elements.namedItem("caption");
+    const submitButton = target.querySelector("button[type='submit']");
+
+    if (!(fileField instanceof HTMLInputElement) || !(captionField instanceof HTMLInputElement) || !itineraryId) {
+      return;
+    }
+
+    const file = fileField.files?.[0];
+    if (!file) {
+      return;
+    }
+
+    const uploadPhoto = async () => {
+      if (submitButton instanceof HTMLButtonElement) {
+        submitButton.disabled = true;
+        submitButton.textContent = "압축 후 업로드 중...";
+      }
+
+      let uploadFile = file;
+
+      try {
+        uploadFile = await compressImageFile(file);
+      } catch (compressionError) {
+        if (submitButton instanceof HTMLButtonElement) {
+          submitButton.disabled = false;
+          submitButton.textContent = "사진 추가";
+        }
+        alert(compressionError instanceof Error ? compressionError.message : "이미지 압축에 실패했습니다.");
+        return;
+      }
+
+      const safeName = sanitizeFileName(uploadFile.name);
+      const storagePath = `${itineraryId}/${Date.now()}-${safeName || "photo"}`;
+      const { error: uploadError } = await supabaseClient.storage.from(recordBucket).upload(
+        storagePath,
+        uploadFile,
+        {
+          upsert: false,
+          contentType: uploadFile.type || "image/jpeg",
+        }
+      );
+
+      if (uploadError) {
+        if (submitButton instanceof HTMLButtonElement) {
+          submitButton.disabled = false;
+          submitButton.textContent = "사진 추가";
+        }
+        alert(`사진 업로드에 실패했습니다: ${uploadError.message}`);
+        return;
+      }
+
+      const { data: publicUrlData } = supabaseClient.storage.from(recordBucket).getPublicUrl(storagePath);
+      const { error: insertError } = await supabaseClient.from("travel_record_photos").insert({
+        itinerary_id: itineraryId,
+        caption: captionField.value.trim(),
+        image_url: publicUrlData.publicUrl,
+        storage_path: storagePath,
+        file_name: file.name,
+      });
+
+      if (submitButton instanceof HTMLButtonElement) {
+        submitButton.disabled = false;
+        submitButton.textContent = "사진 추가";
+      }
+
+      if (insertError) {
+        await supabaseClient.storage.from(recordBucket).remove([storagePath]);
+        alert(`사진 기록 저장에 실패했습니다: ${insertError.message}`);
+        return;
+      }
+
+      target.reset();
+      await loadRecords();
+    };
+
+    uploadPhoto();
+  });
+
+  recordListElement?.addEventListener("click", (event) => {
+    const target = event.target;
+    if (!(target instanceof HTMLElement)) {
+      return;
+    }
+
+    if (target.classList.contains("record-photo-open")) {
+      const itineraryId = String(target.dataset.itineraryId || "").trim();
+      const photoIndex = Number(target.dataset.photoIndex || 0);
+      if (itineraryId) {
+        openViewer(itineraryId, photoIndex);
+      }
+      return;
+    }
+
+    if (target.classList.contains("record-photo-shift")) {
+      const itineraryId = String(target.dataset.itineraryId || "").trim();
+      const direction = Number(target.dataset.direction || 0);
+      const track = recordListElement.querySelector(`.record-photo-track[data-itinerary-id="${itineraryId}"]`);
+
+      if (track instanceof HTMLElement && direction) {
+        const firstCard = track.querySelector(".record-photo-card");
+        const cardWidth = firstCard instanceof HTMLElement ? firstCard.getBoundingClientRect().width : 320;
+        track.scrollBy({
+          left: direction * (cardWidth + 16),
+          behavior: "smooth",
+        });
+      }
+      return;
+    }
+
+    if (!target.classList.contains("record-photo-delete") || !supabaseClient) {
+      return;
+    }
+
+    const photoId = String(target.dataset.photoId || "").trim();
+    const storagePath = String(target.dataset.storagePath || "").trim();
+    if (!photoId || !storagePath) {
+      return;
+    }
+
+    const removePhoto = async () => {
+      target.setAttribute("disabled", "true");
+      const { error: storageError } = await supabaseClient.storage.from(recordBucket).remove([storagePath]);
+      if (storageError) {
+        target.removeAttribute("disabled");
+        alert(`사진 삭제에 실패했습니다: ${storageError.message}`);
+        return;
+      }
+
+      const { error: deleteError } = await supabaseClient.from("travel_record_photos").delete().eq("id", photoId);
+      target.removeAttribute("disabled");
+
+      if (deleteError) {
+        alert(`사진 기록 삭제에 실패했습니다: ${deleteError.message}`);
+        return;
+      }
+
+      await loadRecords();
+    };
+
+    removePhoto();
+  });
+
+  const viewer = ensureViewer();
+  let viewerPointerStartX = 0;
+  let viewerPointerTracking = false;
+
+  viewer.addEventListener("click", (event) => {
+    const target = event.target;
+    if (!(target instanceof HTMLElement)) {
+      return;
+    }
+
+    if (target.dataset.viewerClose === "true") {
+      closeViewer();
+      return;
+    }
+
+    const step = Number(target.dataset.viewerStep || 0);
+    if (step) {
+      moveViewer(step);
+    }
+  });
+
+  viewer.addEventListener("pointerdown", (event) => {
+    const target = event.target;
+    if (!(target instanceof HTMLElement) || !target.closest(".record-viewer-figure")) {
+      return;
+    }
+    viewerPointerTracking = true;
+    viewerPointerStartX = event.clientX;
+  });
+
+  viewer.addEventListener("pointerup", (event) => {
+    if (!viewerPointerTracking) {
+      return;
+    }
+    const diffX = event.clientX - viewerPointerStartX;
+    viewerPointerTracking = false;
+    if (Math.abs(diffX) < 40) {
+      return;
+    }
+    moveViewer(diffX < 0 ? 1 : -1);
+  });
+
+  viewer.addEventListener("pointercancel", () => {
+    viewerPointerTracking = false;
+  });
+
+  document.addEventListener("keydown", (event) => {
+    const activeViewer = document.getElementById("record-photo-viewer");
+    if (!activeViewer || activeViewer.classList.contains("is-hidden")) {
+      return;
+    }
+
+    if (event.key === "Escape") {
+      closeViewer();
+      return;
+    }
+    if (event.key === "ArrowLeft") {
+      moveViewer(-1);
+      return;
+    }
+    if (event.key === "ArrowRight") {
+      moveViewer(1);
+    }
+  });
+
+  if (!supabaseUrl || !supabaseAnonKey || !window.supabase?.createClient) {
+    setupNotice?.classList.remove("is-hidden");
+    renderRecords();
+  } else {
+    supabaseClient = window.supabase.createClient(supabaseUrl, supabaseAnonKey);
+    loadRecords();
+
+    supabaseClient
+      .channel("public:travel_record_photos")
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "travel_record_photos",
+        },
+        () => {
+          loadRecords();
         }
       )
       .subscribe();

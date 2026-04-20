@@ -754,6 +754,15 @@ body[data-page="details"] .page-header h1 {
   border-top: 1px solid rgba(12, 79, 104, 0.08);
 }
 
+.record-guide {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.8), rgba(222, 245, 246, 0.72));
+}
+
+.record-entry {
+  display: grid;
+  gap: 18px;
+}
+
 .timeline-time {
   display: inline-flex;
   align-items: center;
@@ -765,6 +774,187 @@ body[data-page="details"] .page-header h1 {
   font-family: "Space Grotesk", sans-serif;
   font-size: 0.88rem;
   font-weight: 700;
+}
+
+.record-upload-form {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto;
+  gap: 12px;
+  align-items: end;
+  padding: 16px;
+  border: 1px solid rgba(12, 79, 104, 0.1);
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.66);
+}
+
+.record-upload-form .form-field {
+  margin: 0;
+}
+
+.record-upload-note {
+  grid-column: 1 / -1;
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.88rem;
+  line-height: 1.6;
+}
+
+.record-photo-gallery {
+  display: grid;
+  gap: 14px;
+}
+
+.record-photo-slider-head,
+.record-photo-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.record-photo-slider-head strong {
+  font-family: "Space Grotesk", sans-serif;
+  font-size: 0.98rem;
+}
+
+.record-photo-nav {
+  justify-content: flex-end;
+}
+
+.record-photo-shift {
+  min-height: 38px;
+  padding: 0 12px;
+}
+
+.record-photo-track {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: calc((100% - 16px) / 2);
+  gap: 16px;
+  overflow-x: auto;
+  padding-bottom: 6px;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: thin;
+  overscroll-behavior-x: contain;
+}
+
+.record-photo-card {
+  display: grid;
+  gap: 10px;
+  padding: 12px;
+  border: 1px solid rgba(12, 79, 104, 0.1);
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.74);
+  scroll-snap-align: start;
+}
+
+.record-photo-card img {
+  width: 100%;
+  aspect-ratio: 4 / 5;
+  object-fit: cover;
+  border-radius: 16px;
+  background: rgba(12, 79, 104, 0.08);
+  cursor: pointer;
+}
+
+.record-photo-copy {
+  display: grid;
+  gap: 10px;
+}
+
+.record-photo-copy strong {
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+.record-photo-delete {
+  justify-self: start;
+  min-height: 38px;
+  padding: 0 12px;
+}
+
+.record-viewer {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+}
+
+.record-viewer.is-hidden {
+  display: none;
+}
+
+.record-viewer-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(8, 18, 28, 0.82);
+  backdrop-filter: blur(6px);
+}
+
+.record-viewer-dialog {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 16px;
+  width: min(1100px, calc(100% - 40px));
+  height: min(88vh, 920px);
+  margin: min(6vh, 40px) auto;
+}
+
+.record-viewer-figure {
+  display: grid;
+  gap: 12px;
+  margin: 0;
+  justify-items: center;
+}
+
+.record-viewer-figure img {
+  width: auto;
+  max-width: 100%;
+  max-height: calc(88vh - 90px);
+  border-radius: 24px;
+  object-fit: contain;
+  background: rgba(255, 255, 255, 0.06);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.28);
+  touch-action: pan-y;
+}
+
+.record-viewer-caption {
+  color: rgba(255, 255, 255, 0.92);
+  text-align: center;
+  line-height: 1.6;
+}
+
+.record-viewer-nav,
+.record-viewer-close {
+  display: inline-grid;
+  place-items: center;
+  width: 52px;
+  height: 52px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+  font: inherit;
+  cursor: pointer;
+}
+
+.record-viewer-nav {
+  font-size: 1.7rem;
+}
+
+.record-viewer-close {
+  position: absolute;
+  top: -4px;
+  right: 0;
+  font-size: 2rem;
+  line-height: 1;
+}
+
+body.viewer-open {
+  overflow: hidden;
 }
 
 .schedule-board-panel {
@@ -1364,6 +1554,7 @@ body[data-page="details"] .page-header h1 {
   .budget-layout,
   .checklist-layout,
   .schedule-layout,
+  .record-upload-form,
   .timeline-day,
   .info-grid,
   .detail-columns,
@@ -1393,6 +1584,36 @@ body[data-page="details"] .page-header h1 {
 
   .hero-visual {
     min-height: auto;
+  }
+
+  .record-upload-form {
+    grid-template-columns: 1fr;
+  }
+
+  .record-photo-track {
+    grid-auto-columns: 84%;
+  }
+
+  .record-viewer-dialog {
+    grid-template-columns: 1fr;
+    width: min(100% - 20px, 720px);
+    height: auto;
+    margin: 20px auto;
+    padding-top: 56px;
+  }
+
+  .record-viewer-nav {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+  }
+
+  .record-viewer-prev {
+    left: 8px;
+  }
+
+  .record-viewer-next {
+    right: 8px;
   }
 }
 

@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>JIJUN | 여행 기록</title>
+  <link rel="icon" type="image/png" sizes="32x32" href="jijun_favicon_32.png">
+  <link rel="icon" type="image/png" sizes="64x64" href="jijun_favicon_64.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body data-page="records">
+  <div class="site-shell">
+    <header class="topbar">
+      <a class="brand" href="index.html">
+        <span class="brand-mark">J</span>
+        <span>
+          <strong>JIJUN</strong>
+          <small>쿤밍 · 리장 · 샹그릴라 여행</small>
+        </span>
+      </a>
+      <nav class="nav">
+        <a href="index.html">홈/개요</a>
+        <a href="schedule.html">여행 일정표</a>
+        <a href="records.html">여행 기록</a>
+        <a href="details.html">체크리스트</a>
+        <a href="budget.html">지출</a>
+      </nav>
+    </header>
+
+    <main>
+      <section class="page-header">
+        <p class="eyebrow">Travel Journal</p>
+        <h1>여행 기록</h1>
+        <p>일정표에 등록된 일정 아래에 사진을 올리고, 그 순간을 하루별 기록으로 모아볼 수 있습니다.</p>
+      </section>
+
+      <section id="records-setup-notice" class="panel setup-notice is-hidden">
+        <div class="panel-head">
+          <p class="eyebrow">Supabase Setup</p>
+          <h2>여행 기록용 테이블과 스토리지 설정 필요</h2>
+        </div>
+        <p class="setup-copy">
+          <code>itinerary_items</code>, <code>travel_record_photos</code> 테이블과
+          <code>travel-records</code> 스토리지 버킷이 준비되면 일정별 사진 기록을 바로 사용할 수 있습니다.
+        </p>
+      </section>
+
+      <section class="panel record-guide">
+        <div class="panel-head">
+          <p class="eyebrow">How It Works</p>
+          <h2>일정과 사진을 함께 기록</h2>
+        </div>
+        <p class="setup-copy">
+          예시: <strong>DAY 0 · 04.29 · 인천공항 근처 숙소</strong> 아래에 사진을 업로드하면, 그 일정 카드 안에서 바로 썸네일과 메모를 볼 수 있습니다.
+        </p>
+      </section>
+
+      <section id="record-list" class="timeline"></section>
+    </main>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase-config.js"></script>
+  <script src="script.js?v=20260420-photos"></script>
+</body>
+</html>
