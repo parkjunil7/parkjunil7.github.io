@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>JIJUN | 로그인</title>
+  <link rel="icon" type="image/png" sizes="32x32" href="jijun_favicon_32.png">
+  <link rel="icon" type="image/png" sizes="64x64" href="jijun_favicon_64.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body data-page="login" class="login-page">
+  <main class="login-shell">
+    <section class="login-card">
+      <p class="eyebrow">JJTG</p>
+      <h1>JI-JUN Travel LOG</h1>
+      <p class="login-copy">Jiyeong &amp; Junil’s Travel Site<br>Access is limited to Jiyeong and Junil only.</p>
+      <form id="login-form" class="login-form">
+        <label class="form-field">
+          <span>ID</span>
+          <input type="text" name="username" placeholder="아이디 입력" autocomplete="username" required>
+        </label>
+        <label class="form-field">
+          <span>PW</span>
+          <input type="password" name="password" placeholder="비밀번호 입력" autocomplete="current-password" required>
+        </label>
+        <p id="login-error" class="login-error is-hidden"></p>
+        <button type="submit" class="button primary login-submit">로그인</button>
+      </form>
+      <div class="login-note">
+        <strong>Notice</strong>
+        <p>Jiyeong and Junil’s first overseas trip: China!</p>
+      </div>
+    </section>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase-config.js"></script>
+  <script src="script.js?v=20260420-auth"></script>
+</body>
+</html>

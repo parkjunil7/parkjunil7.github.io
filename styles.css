@@ -30,6 +30,15 @@ body {
     linear-gradient(180deg, #edf6f7 0%, #e8f0ef 100%);
 }
 
+html.auth-pending body[data-page="home"],
+html.auth-pending body[data-page="schedule"],
+html.auth-pending body[data-page="records"],
+html.auth-pending body[data-page="details"],
+html.auth-pending body[data-page="budget"],
+html.auth-pending body[data-page="login"] {
+  visibility: hidden;
+}
+
 a {
   color: inherit;
   text-decoration: none;
@@ -106,6 +115,18 @@ h3,
 .nav a:hover {
   color: var(--text);
   background: rgba(14, 138, 149, 0.12);
+}
+
+.nav-auth-button {
+  min-height: 42px;
+  padding: 0 14px;
+  border: 1px solid rgba(12, 79, 104, 0.16);
+  border-radius: 999px;
+  background: rgba(247, 252, 251, 0.86);
+  color: var(--accent-deep);
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
 }
 
 main {
@@ -1513,6 +1534,75 @@ body.viewer-open {
   margin: 0;
   color: var(--muted);
   line-height: 1.8;
+}
+
+.login-page {
+  display: grid;
+  place-items: center;
+  padding: 24px;
+}
+
+.login-shell {
+  width: min(100%, 520px);
+}
+
+.login-card {
+  padding: 32px;
+  border: 1px solid var(--line);
+  border-radius: 32px;
+  background: rgba(247, 252, 251, 0.82);
+  backdrop-filter: blur(16px);
+  box-shadow: var(--shadow);
+}
+
+.login-card h1 {
+  margin: 0 0 12px;
+  font-size: clamp(2rem, 5vw, 3rem);
+}
+
+.login-copy {
+  margin: 0 0 24px;
+  color: var(--muted);
+  line-height: 1.7;
+}
+
+.login-form {
+  display: grid;
+  gap: 16px;
+}
+
+.login-submit {
+  min-height: 52px;
+}
+
+.login-error {
+  margin: 0;
+  padding: 12px 14px;
+  border-radius: 14px;
+  background: rgba(202, 31, 47, 0.08);
+  color: #a22435;
+  font-size: 0.92rem;
+  line-height: 1.6;
+}
+
+.login-note {
+  display: grid;
+  gap: 8px;
+  margin-top: 18px;
+  padding: 16px;
+  border: 1px dashed rgba(12, 79, 104, 0.16);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.55);
+}
+
+.login-note strong {
+  font-family: "Space Grotesk", sans-serif;
+}
+
+.login-note p {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.7;
 }
 
 .is-hidden {

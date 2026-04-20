@@ -1,11 +1,17 @@
 const currentPage = document.body.dataset.page;
 
 const hrefMap = {
+  login: "login.html",
   home: "index.html",
   schedule: "schedule.html",
   records: "records.html",
   details: "details.html",
   budget: "budget.html",
+};
+const protectedPages = new Set(["home", "schedule", "records", "details", "budget"]);
+const loginAliases = {
+  "천재지영": "jiyoung@jijun-trip.local",
+  "영재준일": "junil@jijun-trip.local",
 };
 
 const isValidTime = (value) => /^([01]\d|2[0-3]):([0-5]\d)$/.test(value);
@@ -39,6 +45,146 @@ window.addEventListener("error", (event) => {
 window.addEventListener("unhandledrejection", (event) => {
   console.error("Unhandled promise rejection", event.reason);
 });
+
+const authConfig = window.SUPABASE_CONFIG || {};
+const authClient =
+  window.supabase?.createClient && authConfig.url && authConfig.anonKey
+    ? window.supabase.createClient(authConfig.url, authConfig.anonKey)
+    : null;
+
+const getNextPath = () => {
+  const next = new URLSearchParams(window.location.search).get("next");
+  return next && !next.includes("login.html") ? next : "index.html";
+};
+
+const ensureLogoutButton = (session) => {
+  const nav = document.querySelector(".nav");
+  if (!nav || !authClient) {
+    return;
+  }
+
+  let button = nav.querySelector(".nav-auth-button");
+  if (!button) {
+    button = document.createElement("button");
+    button.type = "button";
+    button.className = "nav-auth-button";
+    button.textContent = "로그아웃";
+    button.addEventListener("click", async () => {
+      await authClient.auth.signOut();
+      window.location.replace("login.html");
+    });
+    nav.appendChild(button);
+  }
+
+  const email = session?.user?.email || "";
+  button.setAttribute("title", email);
+};
+
+if (currentPage === "login") {
+  document.documentElement.classList.add("auth-pending");
+
+  const loginForm = document.getElementById("login-form");
+  const loginError = document.getElementById("login-error");
+
+  const showLoginError = (message) => {
+    if (!loginError) {
+      return;
+    }
+    loginError.textContent = message;
+    loginError.classList.remove("is-hidden");
+  };
+
+  const hideLoginError = () => {
+    loginError?.classList.add("is-hidden");
+  };
+
+  if (authClient) {
+    authClient.auth.getSession().then(({ data }) => {
+      if (data.session) {
+        window.location.replace(getNextPath());
+        return;
+      }
+      document.documentElement.classList.remove("auth-pending");
+    });
+
+    loginForm?.addEventListener("submit", (event) => {
+      event.preventDefault();
+      if (!(loginForm instanceof HTMLFormElement)) {
+        return;
+      }
+
+      const formData = new FormData(loginForm);
+      const username = String(formData.get("username") || "").trim();
+      const password = String(formData.get("password") || "").trim();
+      const email = loginAliases[username];
+      const submitButton = loginForm.querySelector("button[type='submit']");
+
+      hideLoginError();
+
+      if (!email || !password) {
+        showLoginError("허용된 아이디로 로그인해 주세요.");
+        return;
+      }
+
+      const submitLogin = async () => {
+        if (submitButton instanceof HTMLButtonElement) {
+          submitButton.disabled = true;
+          submitButton.textContent = "로그인 중...";
+        }
+
+        const { error } = await authClient.auth.signInWithPassword({
+          email,
+          password,
+        });
+
+        if (submitButton instanceof HTMLButtonElement) {
+          submitButton.disabled = false;
+          submitButton.textContent = "로그인";
+        }
+
+        if (error) {
+          showLoginError("아이디 또는 비밀번호를 다시 확인해 주세요.");
+          return;
+        }
+
+        window.location.replace(getNextPath());
+      };
+
+      submitLogin();
+    });
+  } else {
+    document.documentElement.classList.remove("auth-pending");
+    showLoginError("Supabase 인증 설정을 먼저 확인해 주세요.");
+  }
+}
+
+if (protectedPages.has(currentPage)) {
+  document.documentElement.classList.add("auth-pending");
+
+  if (authClient) {
+    authClient.auth.getSession().then(({ data }) => {
+      if (!data.session) {
+        const nextPath = window.location.pathname.split("/").pop() || "index.html";
+        window.location.replace(`login.html?next=${encodeURIComponent(nextPath)}`);
+        return;
+      }
+
+      ensureLogoutButton(data.session);
+      document.documentElement.classList.remove("auth-pending");
+    });
+
+    authClient.auth.onAuthStateChange((_event, session) => {
+      if (!session) {
+        const nextPath = window.location.pathname.split("/").pop() || "index.html";
+        window.location.replace(`login.html?next=${encodeURIComponent(nextPath)}`);
+        return;
+      }
+
+      ensureLogoutButton(session);
+      document.documentElement.classList.remove("auth-pending");
+    });
+  }
+}
 
 document.querySelectorAll(".nav a").forEach((link) => {
   const target = hrefMap[currentPage];
@@ -1573,7 +1719,7 @@ if (currentPage === "records") {
     const safeIndex = ((activeViewerIndex % photos.length) + photos.length) % photos.length;
     activeViewerIndex = safeIndex;
     const photo = photos[safeIndex];
-    imageElement.src = photo.image_url;
+    imageElement.src = photo.signed_url || photo.image_url;
     imageElement.alt = photo.caption || "여행 사진";
     captionElement.textContent = `${photo.caption || "여행 기록"} · ${safeIndex + 1}/${photos.length}`;
 
@@ -1765,7 +1911,7 @@ if (currentPage === "records") {
                                     (photo, index) => `
                                       <article class="record-photo-card">
                                         <img
-                                          src="${escapeHtml(photo.image_url)}"
+                                          src="${escapeHtml(photo.signed_url || photo.image_url)}"
                                           alt="${escapeHtml(photo.caption || item.title)}"
                                           loading="lazy"
                                           class="record-photo-open"
@@ -1820,7 +1966,31 @@ if (currentPage === "records") {
     }
 
     scheduleItems = scheduleResponse.data || [];
-    recordPhotos = photoResponse.data || [];
+    const photos = photoResponse.data || [];
+
+    if (photos.length) {
+      const { data: signedUrls, error: signedUrlError } = await supabaseClient.storage
+        .from(recordBucket)
+        .createSignedUrls(
+          photos.map((photo) => photo.storage_path),
+          60 * 60
+        );
+
+      if (signedUrlError) {
+        setupNotice?.classList.remove("is-hidden");
+        recordListElement.innerHTML =
+          "<p class='budget-empty'>사진 접근 주소를 만들지 못했습니다. 스토리지 권한 설정을 확인해 주세요.</p>";
+        return;
+      }
+
+      recordPhotos = photos.map((photo, index) => ({
+        ...photo,
+        signed_url: signedUrls?.[index]?.signedUrl || "",
+      }));
+    } else {
+      recordPhotos = [];
+    }
+
     renderRecords();
   };
 
