@@ -332,6 +332,13 @@ if (currentPage === "details") {
       note: "현금 30만원 수준이 적당한지 최종 예산과 결제수단 기준으로 점검",
       sort_order: 60,
     },
+    {
+      slug: "hotel-booking",
+      category: "예약",
+      title: "숙소 예약하기(4월30일~5월6일)",
+      note: "여행 기간에 맞는 숙소 예약 내역과 체크인 정보를 확인",
+      sort_order: 70,
+    },
   ];
 
   const escapeHtml = (value) =>
@@ -449,6 +456,21 @@ if (currentPage === "details") {
 
       if (seedError) {
         groupsElement.innerHTML = `<p class='budget-empty'>기본 체크리스트 생성에 실패했습니다: ${escapeHtml(seedError.message)}</p>`;
+        return;
+      }
+
+      await loadChecklist();
+      return;
+    }
+
+    const existingSlugs = new Set((data || []).map((item) => item.slug));
+    const missingDefaultItems = defaultChecklistItems.filter((item) => !existingSlugs.has(item.slug));
+
+    if (missingDefaultItems.length) {
+      const { error: insertError } = await supabaseClient.from("trip_checklist_items").insert(missingDefaultItems);
+
+      if (insertError) {
+        groupsElement.innerHTML = `<p class='budget-empty'>누락된 체크리스트 항목을 추가하지 못했습니다: ${escapeHtml(insertError.message)}</p>`;
         return;
       }
 
