@@ -1216,6 +1216,46 @@ body[data-page="details"] .page-header h1 {
   gap: 14px;
 }
 
+.budget-category-group {
+  display: grid;
+  gap: 12px;
+  padding: 18px;
+  border: 1px solid rgba(12, 79, 104, 0.12);
+  border-radius: 22px;
+  background: rgba(255, 255, 255, 0.58);
+}
+
+.budget-category-head,
+.budget-category-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.budget-category-title {
+  justify-content: flex-start;
+}
+
+.budget-category-title strong,
+.budget-category-total {
+  font-family: "Space Grotesk", sans-serif;
+}
+
+.budget-category-title strong {
+  font-size: 0.95rem;
+}
+
+.budget-category-total {
+  font-size: 1rem;
+}
+
+.budget-category-items {
+  display: grid;
+  gap: 10px;
+}
+
 .budget-item {
   display: grid;
   grid-template-columns: 1fr auto;

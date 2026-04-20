@@ -93,6 +93,13 @@ if (currentPage === "budget") {
       acc[item.category] = (acc[item.category] || 0) + item.amount;
       return acc;
     }, {});
+    const groupedItems = budgetItems.reduce((acc, item) => {
+      if (!acc[item.category]) {
+        acc[item.category] = [];
+      }
+      acc[item.category].push(item);
+      return acc;
+    }, {});
 
     summaryElement.innerHTML = Object.entries(grouped)
       .sort((a, b) => b[1] - a[1])
@@ -111,23 +118,42 @@ if (currentPage === "budget") {
       })
       .join("");
 
-    itemsElement.innerHTML = budgetItems
-      .map(
-        (item) => `
-          <article class="budget-item">
-            <div>
-              <h3>${item.title}</h3>
-              <div class="budget-meta">
-                <span class="budget-chip">${item.category}</span>
-              </div>
+    itemsElement.innerHTML = Object.entries(groupedItems)
+      .sort(([, itemsA], [, itemsB]) => {
+        const totalA = itemsA.reduce((sum, item) => sum + item.amount, 0);
+        const totalB = itemsB.reduce((sum, item) => sum + item.amount, 0);
+        return totalB - totalA;
+      })
+      .map(([category, items]) => `
+        <section class="budget-category-group">
+          <div class="budget-category-head">
+            <div class="budget-category-title">
+              <span class="budget-chip">${category}</span>
+              <strong>${items.length}건</strong>
             </div>
-            <div class="budget-amount-wrap">
-              <strong class="budget-amount">${formatCurrency(item.amount)}</strong>
-              <button type="button" class="button secondary budget-delete" data-id="${item.id}">삭제</button>
-            </div>
-          </article>
-        `
-      )
+            <strong class="budget-category-total">${formatCurrency(
+              items.reduce((sum, item) => sum + item.amount, 0)
+            )}</strong>
+          </div>
+          <div class="budget-category-items">
+            ${items
+              .map(
+                (item) => `
+                  <article class="budget-item">
+                    <div>
+                      <h3>${item.title}</h3>
+                    </div>
+                    <div class="budget-amount-wrap">
+                      <strong class="budget-amount">${formatCurrency(item.amount)}</strong>
+                      <button type="button" class="button secondary budget-delete" data-id="${item.id}">삭제</button>
+                    </div>
+                  </article>
+                `
+              )
+              .join("")}
+          </div>
+        </section>
+      `)
       .join("");
 
   };
