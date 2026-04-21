@@ -1605,6 +1605,188 @@ body.viewer-open {
   line-height: 1.7;
 }
 
+.arrival-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1100;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background:
+    radial-gradient(circle at 20% 20%, rgba(121, 214, 220, 0.35), transparent 24%),
+    radial-gradient(circle at 80% 30%, rgba(14, 138, 149, 0.24), transparent 20%),
+    rgba(235, 245, 246, 0.86);
+  backdrop-filter: blur(10px);
+  animation: overlayFadeIn 0.35s ease both;
+}
+
+.arrival-overlay.is-leaving {
+  animation: overlayFadeOut 0.55s ease both;
+}
+
+.arrival-overlay-card {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: min(720px, calc(100% - 24px));
+  min-height: 320px;
+  padding: 28px;
+  overflow: hidden;
+  border: 1px solid rgba(12, 79, 104, 0.12);
+  border-radius: 32px;
+  background: rgba(247, 252, 251, 0.88);
+  box-shadow: 0 30px 80px rgba(23, 47, 69, 0.16);
+  text-align: center;
+}
+
+.arrival-sequence {
+  margin: 0;
+  opacity: 0;
+  transform: translateY(12px);
+  animation: arrivalLineSequence 2.15s ease forwards;
+}
+
+.arrival-sequence-1 {
+  color: var(--accent-deep);
+  font-size: clamp(1.05rem, 2.2vw, 1.35rem);
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  animation-delay: 0.35s;
+}
+
+.arrival-sequence-2 {
+  margin-top: 16px;
+  color: var(--text);
+  font-size: clamp(1.2rem, 2.6vw, 1.7rem);
+  font-weight: 700;
+  line-height: 1.6;
+  animation-delay: 1.75s;
+}
+
+.arrival-sequence-3 {
+  margin-top: 16px;
+  color: var(--accent-deep);
+  font-family: "Space Grotesk", sans-serif;
+  font-size: clamp(2.35rem, 7vw, 5.1rem);
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  line-height: 1.15;
+  animation-delay: 3.15s;
+}
+
+.arrival-logo-sequence {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-content: center;
+  opacity: 0;
+  animation: arrivalLogoIn 0.5s ease 5.3s forwards;
+}
+
+.arrival-logo-word {
+  display: inline-flex;
+  align-items: baseline;
+  justify-content: center;
+  max-width: min(84vw, 660px);
+  color: var(--accent-deep);
+  font-family: "Space Grotesk", sans-serif;
+  font-weight: 800;
+  line-height: 1.1;
+  white-space: nowrap;
+}
+
+.arrival-logo-letter {
+  color: var(--accent-deep);
+  font-size: clamp(2.6rem, 9vw, 6rem);
+  letter-spacing: 0.08em;
+}
+
+.arrival-logo-fill {
+  display: inline-block;
+  max-width: 0;
+  overflow: hidden;
+  color: var(--text);
+  font-size: clamp(0.72rem, 2.05vw, 1.45rem);
+  font-weight: 700;
+  opacity: 0;
+  white-space: nowrap;
+  animation: arrivalLogoFill 1.45s cubic-bezier(0.2, 0.72, 0.16, 1) 5.65s forwards;
+}
+
+.arrival-route-meta,
+.arrival-route-line,
+.arrival-dot,
+.arrival-trail,
+.arrival-plane,
+.arrival-title {
+  display: none;
+}
+
+.arrival-route-meta {
+  display: grid;
+  gap: 6px;
+  color: var(--accent-deep);
+  font-family: "Space Grotesk", sans-serif;
+}
+
+.arrival-route-meta strong {
+  margin-top: 8px;
+  font-size: 1.05rem;
+  letter-spacing: 0.06em;
+}
+
+.arrival-route-line {
+  position: relative;
+  height: 110px;
+  margin: 18px 0 14px;
+}
+
+.arrival-trail {
+  position: absolute;
+  top: 50%;
+  left: 8%;
+  width: 84%;
+  height: 2px;
+  border-top: 2px dashed rgba(12, 79, 104, 0.28);
+  transform: translateY(-50%);
+}
+
+.arrival-dot {
+  position: absolute;
+  top: 50%;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--accent-deep);
+  transform: translateY(-50%);
+  box-shadow: 0 0 0 10px rgba(14, 138, 149, 0.1);
+}
+
+.arrival-dot-start {
+  left: 8%;
+}
+
+.arrival-dot-end {
+  right: 8%;
+}
+
+.arrival-plane {
+  position: absolute;
+  top: 50%;
+  left: 8%;
+  color: var(--accent-deep);
+  font-size: 1.8rem;
+  transform: translate(-50%, -50%) rotate(18deg);
+  animation: flightPath 1.7s ease-in-out 0.15s both;
+}
+
+.arrival-title {
+  margin: 0;
+  color: var(--text);
+  font-family: "Space Grotesk", sans-serif;
+  font-size: clamp(1.6rem, 4vw, 2.6rem);
+}
+
 .is-hidden {
   display: none;
 }
@@ -1634,6 +1816,93 @@ body.viewer-open {
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+@keyframes flightPath {
+  0% {
+    left: 8%;
+    transform: translate(-50%, -50%) rotate(10deg) scale(0.94);
+    opacity: 0.4;
+  }
+  20% {
+    transform: translate(-50%, -62%) rotate(14deg) scale(1);
+    opacity: 1;
+  }
+  55% {
+    transform: translate(-50%, -42%) rotate(18deg) scale(1);
+  }
+  100% {
+    left: 92%;
+    transform: translate(-50%, -54%) rotate(22deg) scale(1.02);
+    opacity: 1;
+  }
+}
+
+@keyframes overlayFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes overlayFadeOut {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes arrivalLineIn {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes arrivalLineSequence {
+  0% {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  16%,
+  68% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-12px);
+  }
+}
+
+@keyframes arrivalLogoIn {
+  from {
+    opacity: 0;
+    transform: scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes arrivalLogoFill {
+  from {
+    opacity: 0;
+    max-width: 0;
+  }
+  to {
+    opacity: 1;
+    max-width: 12em;
   }
 }
 

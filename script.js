@@ -57,6 +57,39 @@ const getNextPath = () => {
   return next && !next.includes("login.html") ? next : "index.html";
 };
 
+const playArrivalOverlay = () => {
+  if (sessionStorage.getItem("showArrivalFlight") !== "1") {
+    return;
+  }
+
+  sessionStorage.removeItem("showArrivalFlight");
+
+  const overlay = document.createElement("div");
+  overlay.className = "arrival-overlay";
+  overlay.innerHTML = `
+    <div class="arrival-overlay-card">
+      <p class="arrival-sequence arrival-sequence-1">지영이와 준일이의 첫 번째 해외여행</p>
+      <p class="arrival-sequence arrival-sequence-2">함께라서 더 특별한, 우리의 첫 해외 기록.</p>
+      <p class="arrival-sequence arrival-sequence-3">Hello! China!!</p>
+      <div class="arrival-logo-sequence">
+        <span class="arrival-logo-word" aria-label="Jiyeong and Junil Travel LOG">
+          <span class="arrival-logo-letter">J</span><span class="arrival-logo-fill">iyeong and </span><span class="arrival-logo-letter">J</span><span class="arrival-logo-fill">unil </span><span class="arrival-logo-letter">T</span><span class="arrival-logo-fill">ravel LO</span><span class="arrival-logo-letter">G</span>
+        </span>
+      </div>
+    </div>
+  `;
+
+  document.body.appendChild(overlay);
+
+  window.setTimeout(() => {
+    overlay.classList.add("is-leaving");
+  }, 10100);
+
+  window.setTimeout(() => {
+    overlay.remove();
+  }, 10800);
+};
+
 const ensureLogoutButton = (session) => {
   const nav = document.querySelector(".nav");
   if (!nav || !authClient) {
@@ -147,6 +180,7 @@ if (currentPage === "login") {
           return;
         }
 
+        sessionStorage.setItem("showArrivalFlight", "1");
         window.location.replace(getNextPath());
       };
 
@@ -171,6 +205,7 @@ if (protectedPages.has(currentPage)) {
 
       ensureLogoutButton(data.session);
       document.documentElement.classList.remove("auth-pending");
+      playArrivalOverlay();
     });
 
     authClient.auth.onAuthStateChange((_event, session) => {
@@ -182,6 +217,7 @@ if (protectedPages.has(currentPage)) {
 
       ensureLogoutButton(session);
       document.documentElement.classList.remove("auth-pending");
+      playArrivalOverlay();
     });
   }
 }
