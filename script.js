@@ -1876,18 +1876,6 @@ if (currentPage === "records") {
                       </div>
                     </div>
                     ${entries.length ? `<ul>${entries.map((entry) => `<li>${escapeHtml(entry)}</li>`).join("")}</ul>` : ""}
-                    <form class="record-upload-form" data-itinerary-id="${item.id}">
-                      <label class="form-field">
-                        <span>사진 업로드</span>
-                        <input type="file" name="photo" accept="image/*" required>
-                      </label>
-                      <label class="form-field">
-                        <span>메모</span>
-                        <input type="text" name="caption" placeholder="예: 인천공항 근처 숙소 도착">
-                      </label>
-                      <button type="submit" class="button primary">사진 추가</button>
-                      <p class="record-upload-note">업로드 전에 긴 변 1600px, 약 700KB 이하를 목표로 자동 압축합니다.</p>
-                    </form>
                     <div class="record-photo-gallery">
                       ${
                         photos.length
@@ -1931,6 +1919,18 @@ if (currentPage === "records") {
                           : "<p class='budget-empty'>아직 업로드된 사진이 없습니다. 첫 기록을 남겨보세요.</p>"
                       }
                     </div>
+                    <form class="record-upload-form" data-itinerary-id="${item.id}">
+                      <label class="form-field">
+                        <span>사진 업로드</span>
+                        <input type="file" name="photo" accept="image/*" required>
+                      </label>
+                      <label class="form-field">
+                        <span>메모</span>
+                        <input type="text" name="caption" placeholder="예: 인천공항 근처 숙소 도착">
+                      </label>
+                      <button type="submit" class="button primary">사진 추가</button>
+                      <p class="record-upload-note">업로드 전에 긴 변 1600px, 약 700KB 이하를 목표로 자동 압축합니다.</p>
+                    </form>
                   </section>
                 `;
               })
