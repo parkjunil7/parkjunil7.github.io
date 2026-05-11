@@ -1591,26 +1591,6 @@ body.viewer-open {
   line-height: 1.6;
 }
 
-.login-note {
-  display: grid;
-  gap: 8px;
-  margin-top: 18px;
-  padding: 16px;
-  border: 1px dashed rgba(12, 79, 104, 0.16);
-  border-radius: 18px;
-  background: rgba(255, 255, 255, 0.55);
-}
-
-.login-note strong {
-  font-family: "Space Grotesk", sans-serif;
-}
-
-.login-note p {
-  margin: 0;
-  color: var(--muted);
-  line-height: 1.7;
-}
-
 .arrival-overlay {
   position: fixed;
   inset: 0;
