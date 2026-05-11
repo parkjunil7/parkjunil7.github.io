@@ -1,0 +1,61 @@
+<svg width="900" height="900" viewBox="0 0 900 900" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="900" height="900" fill="url(#sky)"/>
+  <circle cx="660" cy="152" r="88" fill="url(#sun)"/>
+  <path d="M0 366C102 332 194 326 286 340C400 358 492 398 588 394C694 390 784 342 900 286V0H0V366Z" fill="url(#mist)" fill-opacity="0.4"/>
+  <path d="M0 520C98 500 174 498 252 512C344 528 424 568 522 570C642 572 756 520 900 460V900H0V520Z" fill="url(#sea)"/>
+  <path d="M0 598C92 590 160 596 232 614C322 638 398 686 494 696C604 708 714 664 900 602V900H0V598Z" fill="url(#seaDeep)"/>
+  <path d="M0 720C94 696 166 694 244 708C338 726 416 768 496 780C596 794 696 766 900 716V900H0V720Z" fill="#11455B" fill-opacity="0.46"/>
+  <path d="M60 552C118 520 166 500 224 490C294 478 356 486 416 516C482 548 536 596 620 602C704 608 790 576 900 514V900H60V552Z" fill="url(#cliff)"/>
+  <path d="M0 694C82 666 148 658 220 664C302 672 376 708 444 730C514 754 586 768 668 760C758 752 828 716 900 674V900H0V694Z" fill="url(#grass)"/>
+  <path d="M0 792C88 776 158 780 228 796C306 814 376 850 450 866C534 884 626 886 900 838V900H0V792Z" fill="#203A3B"/>
+  <path d="M620 274C648 264 674 266 698 276C722 286 740 304 766 308C792 312 820 306 850 286C838 322 810 348 780 360C748 372 708 368 678 350C648 332 628 308 620 274Z" fill="#F9FEFF" fill-opacity="0.84"/>
+  <path d="M0 672C60 644 116 622 176 606C248 586 316 582 388 594C472 608 540 644 604 670" stroke="#D6F9FF" stroke-width="10" stroke-linecap="round" stroke-opacity="0.74"/>
+  <path d="M124 770C188 736 246 720 306 724C384 730 450 770 518 806C582 840 650 862 728 866C788 868 844 860 900 846V900H124V770Z" fill="url(#deck)"/>
+  <path d="M96 900L218 790H360L236 900H96Z" fill="#6F5B49"/>
+  <path d="M284 900L412 780H558L430 900H284Z" fill="#7B6652"/>
+  <path d="M500 900L626 786H776L650 900H500Z" fill="#8D755F"/>
+  <path d="M108 742H792" stroke="#D6E4EB" stroke-width="8" stroke-opacity="0.9"/>
+  <path d="M156 742V900" stroke="#D6E4EB" stroke-width="8" stroke-opacity="0.9"/>
+  <path d="M342 742V900" stroke="#D6E4EB" stroke-width="8" stroke-opacity="0.9"/>
+  <path d="M526 742V900" stroke="#D6E4EB" stroke-width="8" stroke-opacity="0.9"/>
+  <path d="M710 742V900" stroke="#D6E4EB" stroke-width="8" stroke-opacity="0.9"/>
+  <path d="M158 648H226V742H124V682L158 648Z" fill="#274153"/>
+  <path d="M124 682H226L270 736H162L124 682Z" fill="#365266"/>
+  <defs>
+    <linearGradient id="sky" x1="450" y1="0" x2="450" y2="900" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#D8F7FF"/>
+      <stop offset="0.28" stop-color="#9EEAF5"/>
+      <stop offset="0.58" stop-color="#6BCEDF"/>
+      <stop offset="1" stop-color="#1C6B82"/>
+    </linearGradient>
+    <radialGradient id="sun" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(660 152) rotate(90) scale(88)">
+      <stop stop-color="#FFF7CF" stop-opacity="0.96"/>
+      <stop offset="0.54" stop-color="#FFF7CF" stop-opacity="0.42"/>
+      <stop offset="1" stop-color="#FFF7CF" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="mist" x1="450" y1="0" x2="450" y2="366" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FFFFFF"/>
+      <stop offset="1" stop-color="#FFFFFF" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="sea" x1="450" y1="460" x2="450" y2="900" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#6AD2E3"/>
+      <stop offset="1" stop-color="#207A92"/>
+    </linearGradient>
+    <linearGradient id="seaDeep" x1="450" y1="602" x2="450" y2="900" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#2099B5"/>
+      <stop offset="1" stop-color="#0F5063"/>
+    </linearGradient>
+    <linearGradient id="cliff" x1="480" y1="490" x2="480" y2="900" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#4B967F"/>
+      <stop offset="1" stop-color="#1A4C45"/>
+    </linearGradient>
+    <linearGradient id="grass" x1="450" y1="658" x2="450" y2="900" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#77C9A3"/>
+      <stop offset="1" stop-color="#274E4B"/>
+    </linearGradient>
+    <linearGradient id="deck" x1="512" y1="720" x2="512" y2="900" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#E6F6FB" stop-opacity="0.88"/>
+      <stop offset="1" stop-color="#49626C" stop-opacity="0.2"/>
+    </linearGradient>
+  </defs>
+</svg>

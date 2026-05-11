@@ -17,6 +17,11 @@ const loginAliases = {
 const isValidTime = (value) => /^([01]\d|2[0-3]):([0-5]\d)$/.test(value);
 const normalizeTime = (value) => String(value || "").trim();
 const departureDate = "2026-04-30";
+const tripKey = "china-2026";
+const recordBucket = "travel-records";
+const withTripKey = (query) => query.eq("trip_key", tripKey);
+const createRecordStoragePath = (itineraryId, fileName) =>
+  `${tripKey}/${itineraryId}/${Date.now()}-${fileName || "photo"}`;
 const getTimeSortValue = (value) => {
   const normalized = normalizeTime(value);
   const [start] = normalized.split("~");
@@ -356,10 +361,9 @@ if (currentPage === "budget") {
       return;
     }
 
-    const { data, error } = await supabaseClient
-      .from("expenses")
-      .select("id, category, title, amount, created_at")
-      .order("created_at", { ascending: false });
+    const { data, error } = await withTripKey(
+      supabaseClient.from("expenses").select("id, category, title, amount, created_at")
+    ).order("created_at", { ascending: false });
 
     if (error) {
       summaryElement.innerHTML = "<p class='budget-summary-empty'>지출을 불러오지 못했습니다. Supabase 설정을 확인해주세요.</p>";
@@ -391,6 +395,7 @@ if (currentPage === "budget") {
       setLoadingState(true);
 
       const { error } = await supabaseClient.from("expenses").insert({
+        trip_key: tripKey,
         category,
         title,
         amount,
@@ -423,7 +428,7 @@ if (currentPage === "budget") {
 
     const removeExpense = async () => {
       setLoadingState(true);
-      const { error } = await supabaseClient.from("expenses").delete().eq("id", id);
+      const { error } = await supabaseClient.from("expenses").delete().eq("id", id).eq("trip_key", tripKey);
       setLoadingState(false);
 
       if (error) {
@@ -444,7 +449,7 @@ if (currentPage === "budget") {
 
     const resetExpenses = async () => {
       setLoadingState(true);
-      const { error } = await supabaseClient.from("expenses").delete().gte("id", 0);
+      const { error } = await supabaseClient.from("expenses").delete().eq("trip_key", tripKey);
       setLoadingState(false);
 
       if (error) {
@@ -500,6 +505,7 @@ if (currentPage === "details") {
 
   const defaultChecklistItems = [
     {
+      trip_key: tripKey,
       slug: "travel-documents",
       category: "출발 전",
       title: "필수 서류 챙기기",
@@ -507,6 +513,7 @@ if (currentPage === "details") {
       sort_order: 10,
     },
     {
+      trip_key: tripKey,
       slug: "travel-insurance",
       category: "출발 전",
       title: "여행자보험 가입하기",
@@ -514,6 +521,7 @@ if (currentPage === "details") {
       sort_order: 20,
     },
     {
+      trip_key: tripKey,
       slug: "esim-roaming",
       category: "출발 전",
       title: "eSIM 또는 로밍 설정하기",
@@ -521,6 +529,7 @@ if (currentPage === "details") {
       sort_order: 30,
     },
     {
+      trip_key: tripKey,
       slug: "power-bank",
       category: "준비물",
       title: "보조배터리 확인하기",
@@ -528,6 +537,7 @@ if (currentPage === "details") {
       sort_order: 40,
     },
     {
+      trip_key: tripKey,
       slug: "medicine-kit",
       category: "준비물",
       title: "상비약 챙기기",
@@ -535,6 +545,7 @@ if (currentPage === "details") {
       sort_order: 50,
     },
     {
+      trip_key: tripKey,
       slug: "cash-exchange",
       category: "출발 전",
       title: "환전하기",
@@ -542,6 +553,7 @@ if (currentPage === "details") {
       sort_order: 60,
     },
     {
+      trip_key: tripKey,
       slug: "hotel-booking",
       category: "예약",
       title: "숙소 예약하기(4월30일~5월6일)",
@@ -647,9 +659,9 @@ if (currentPage === "details") {
       return;
     }
 
-    const { data, error } = await supabaseClient
-      .from("trip_checklist_items")
-      .select("id, slug, category, title, note, sort_order, is_checked")
+    const { data, error } = await withTripKey(
+      supabaseClient.from("trip_checklist_items").select("id, slug, category, title, note, sort_order, is_checked")
+    )
       .order("sort_order", { ascending: true })
       .order("id", { ascending: true });
 
@@ -661,7 +673,7 @@ if (currentPage === "details") {
     if (!data?.length) {
       const { error: seedError } = await supabaseClient
         .from("trip_checklist_items")
-        .upsert(defaultChecklistItems, { onConflict: "slug" });
+        .upsert(defaultChecklistItems, { onConflict: "trip_key,slug" });
 
       if (seedError) {
         groupsElement.innerHTML = `<p class='budget-empty'>기본 체크리스트 생성에 실패했습니다: ${escapeHtml(seedError.message)}</p>`;
@@ -715,7 +727,8 @@ if (currentPage === "details") {
           is_checked: nextChecked,
           updated_at: new Date().toISOString(),
         })
-        .eq("id", id);
+        .eq("id", id)
+        .eq("trip_key", tripKey);
 
       if (error) {
         alert(`체크 상태 저장에 실패했습니다: ${error.message}`);
@@ -1019,9 +1032,9 @@ if (false && currentPage === "schedule") {
       return;
     }
 
-    const { data, error } = await supabaseClient
-      .from("itinerary_items")
-      .select("id, date, day_label, title, time, items, created_at")
+    const { data, error } = await withTripKey(
+      supabaseClient.from("itinerary_items").select("id, date, day_label, title, time, items, created_at")
+    )
       .order("date", { ascending: true })
       .order("time", { ascending: true });
 
@@ -1067,12 +1080,13 @@ if (false && currentPage === "schedule") {
 
       setLoadingState(true);
         const { error } = await supabaseClient.from("itinerary_items").insert({
-        date,
-        day_label: getDayLabel(date),
-        title,
-        time,
-        items,
-      });
+          trip_key: tripKey,
+          date,
+          day_label: getDayLabel(date),
+          title,
+          time,
+          items,
+        });
       setLoadingState(false);
 
       if (error) {
@@ -1100,7 +1114,7 @@ if (false && currentPage === "schedule") {
 
     const removeSchedule = async () => {
       setLoadingState(true);
-      const { error } = await supabaseClient.from("itinerary_items").delete().eq("id", id);
+      const { error } = await supabaseClient.from("itinerary_items").delete().eq("id", id).eq("trip_key", tripKey);
       setLoadingState(false);
 
       if (error) {
@@ -1121,7 +1135,7 @@ if (false && currentPage === "schedule") {
 
     const resetSchedule = async () => {
       setLoadingState(true);
-      const { error } = await supabaseClient.from("itinerary_items").delete().gte("id", 0);
+      const { error } = await supabaseClient.from("itinerary_items").delete().eq("trip_key", tripKey);
       setLoadingState(false);
 
       if (error) {
@@ -1486,9 +1500,9 @@ if (currentPage === "schedule") {
       return;
     }
 
-    const { data, error } = await supabaseClient
-      .from("itinerary_items")
-      .select("id, date, day_label, title, time, items, created_at")
+    const { data, error } = await withTripKey(
+      supabaseClient.from("itinerary_items").select("id, date, day_label, title, time, items, created_at")
+    )
       .order("date", { ascending: true })
       .order("time", { ascending: true });
 
@@ -1538,6 +1552,7 @@ if (currentPage === "schedule") {
       }
 
       const payload = {
+        trip_key: tripKey,
         date,
         day_label: getDayLabel(date),
         title,
@@ -1547,7 +1562,7 @@ if (currentPage === "schedule") {
 
       setLoadingState(true);
       const { error } = scheduleId
-        ? await supabaseClient.from("itinerary_items").update(payload).eq("id", scheduleId)
+        ? await supabaseClient.from("itinerary_items").update(payload).eq("id", scheduleId).eq("trip_key", tripKey)
         : await supabaseClient.from("itinerary_items").insert(payload);
       setLoadingState(false);
 
@@ -1589,7 +1604,7 @@ if (currentPage === "schedule") {
 
     const removeSchedule = async () => {
       setLoadingState(true);
-      const { error } = await supabaseClient.from("itinerary_items").delete().eq("id", id);
+      const { error } = await supabaseClient.from("itinerary_items").delete().eq("id", id).eq("trip_key", tripKey);
       setLoadingState(false);
 
       if (error) {
@@ -1619,7 +1634,7 @@ if (currentPage === "schedule") {
 
     const resetSchedule = async () => {
       setLoadingState(true);
-      const { error } = await supabaseClient.from("itinerary_items").delete().gte("id", 0);
+      const { error } = await supabaseClient.from("itinerary_items").delete().eq("trip_key", tripKey);
       setLoadingState(false);
 
       if (error) {
@@ -1667,7 +1682,6 @@ if (currentPage === "records") {
   const supabaseConfig = window.SUPABASE_CONFIG || {};
   const supabaseUrl = supabaseConfig.url || "";
   const supabaseAnonKey = supabaseConfig.anonKey || "";
-  const recordBucket = "travel-records";
   const maxUploadWidth = 1600;
   const maxUploadHeight = 1600;
   const targetUploadBytes = 700 * 1024;
@@ -1986,11 +2000,13 @@ if (currentPage === "records") {
       supabaseClient
         .from("itinerary_items")
         .select("id, date, day_label, title, time, items")
+        .eq("trip_key", tripKey)
         .order("date", { ascending: true })
         .order("time", { ascending: true }),
       supabaseClient
         .from("travel_record_photos")
         .select("id, itinerary_id, caption, image_url, storage_path, created_at")
+        .eq("trip_key", tripKey)
         .order("created_at", { ascending: false }),
     ]);
 
@@ -2072,7 +2088,7 @@ if (currentPage === "records") {
       }
 
       const safeName = sanitizeFileName(uploadFile.name);
-      const storagePath = `${itineraryId}/${Date.now()}-${safeName || "photo"}`;
+      const storagePath = createRecordStoragePath(itineraryId, safeName);
       const { error: uploadError } = await supabaseClient.storage.from(recordBucket).upload(
         storagePath,
         uploadFile,
@@ -2093,6 +2109,7 @@ if (currentPage === "records") {
 
       const { data: publicUrlData } = supabaseClient.storage.from(recordBucket).getPublicUrl(storagePath);
       const { error: insertError } = await supabaseClient.from("travel_record_photos").insert({
+        trip_key: tripKey,
         itinerary_id: itineraryId,
         caption: captionField.value.trim(),
         image_url: publicUrlData.publicUrl,
@@ -2168,7 +2185,11 @@ if (currentPage === "records") {
         return;
       }
 
-      const { error: deleteError } = await supabaseClient.from("travel_record_photos").delete().eq("id", photoId);
+      const { error: deleteError } = await supabaseClient
+        .from("travel_record_photos")
+        .delete()
+        .eq("id", photoId)
+        .eq("trip_key", tripKey);
       target.removeAttribute("disabled");
 
       if (deleteError) {
