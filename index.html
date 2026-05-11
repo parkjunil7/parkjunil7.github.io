@@ -24,6 +24,7 @@
       --muted: #698091;
       --accent: #0d637f;
       --accent-soft: #d8eef3;
+      --card-shadow: 0 18px 34px rgba(31, 59, 78, 0.08);
     }
 
     * {
@@ -39,6 +40,7 @@
     body {
       overflow: hidden;
       font-family: "Noto Sans KR", "Segoe UI", sans-serif;
+      color: var(--text);
       background:
         radial-gradient(circle at top left, rgba(110, 214, 221, 0.28), transparent 24%),
         radial-gradient(circle at right 18%, rgba(13, 99, 127, 0.12), transparent 18%),
@@ -110,7 +112,7 @@
       font-weight: 700;
       letter-spacing: 0.08em;
       backdrop-filter: blur(10px);
-      box-shadow: 0 18px 34px rgba(31, 59, 78, 0.08);
+      box-shadow: var(--card-shadow);
     }
 
     .archive-panel {
@@ -155,6 +157,17 @@
       color: var(--text);
       font-size: 2rem;
       line-height: 1;
+    }
+
+    .panel-close {
+      width: 34px;
+      height: 34px;
+      border: 1px solid rgba(13, 99, 127, 0.22);
+      border-radius: 10px;
+      background: rgba(255, 255, 255, 0.9);
+      color: var(--text);
+      font-size: 1rem;
+      cursor: pointer;
     }
 
     .panel-copy {
@@ -205,7 +218,8 @@
       font-weight: 700;
     }
 
-    .panel-copy a {
+    .panel-copy a,
+    .mobile-card-action {
       display: inline-flex;
       align-items: center;
       justify-content: center;
@@ -218,25 +232,117 @@
       font-weight: 700;
     }
 
+    .mobile-archive {
+      display: none;
+    }
+
+    .mobile-archive-header h1 {
+      margin: 14px 0 10px;
+      font-size: clamp(2.15rem, 9vw, 3.2rem);
+      line-height: 0.98;
+      letter-spacing: -0.04em;
+    }
+
+    .mobile-archive-header p {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.7;
+    }
+
+    .mobile-archive-list {
+      display: grid;
+      gap: 14px;
+      margin-top: 22px;
+    }
+
+    .mobile-card {
+      padding: 18px 18px 20px;
+      border: 1px solid var(--panel-line);
+      border-radius: 24px;
+      background: rgba(255, 255, 255, 0.9);
+      box-shadow: var(--card-shadow);
+    }
+
+    .mobile-card-kind {
+      display: inline-flex;
+      align-items: center;
+      padding: 7px 10px;
+      border-radius: 999px;
+      background: rgba(13, 99, 127, 0.08);
+      color: var(--accent);
+      font-size: 0.78rem;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    .mobile-card h2 {
+      margin: 14px 0 0;
+      font-size: 1.4rem;
+      line-height: 1.25;
+    }
+
+    .mobile-card-date {
+      margin-top: 10px;
+      color: var(--accent);
+      font-size: 0.96rem;
+      font-weight: 700;
+    }
+
+    .mobile-card-route {
+      margin-top: 14px;
+      color: var(--muted);
+      line-height: 1.65;
+    }
+
+    .mobile-card-note {
+      margin-top: 14px;
+      color: var(--muted);
+      font-size: 0.92rem;
+      line-height: 1.65;
+    }
+
+    .mobile-card-action.is-disabled {
+      background: rgba(13, 99, 127, 0.1);
+      color: var(--accent);
+      pointer-events: none;
+    }
+
     @media (max-width: 980px) {
+      body {
+        overflow: auto;
+        overflow-x: hidden;
+      }
+
+      .map-shell {
+        width: 100%;
+        min-height: 100vh;
+        height: auto;
+        padding: 84px 14px 28px;
+      }
+
       .intro-chip {
         top: 12px;
         left: 12px;
         font-size: 0.82rem;
       }
 
+      #world-map,
       .archive-panel {
+        display: none;
+      }
+
+      .mobile-archive {
+        display: block;
         width: 100%;
-        padding: 18px 16px 24px;
+        max-width: 100%;
       }
 
-      .panel-title {
-        font-size: 1.7rem;
-      }
-
-      .panel-copy {
-        margin-top: 22px;
-        padding: 18px 16px;
+      .mobile-archive-header,
+      .mobile-archive-list,
+      .mobile-card {
+        width: 100%;
+        max-width: 100%;
       }
     }
   </style>
@@ -244,9 +350,19 @@
 <body>
   <div class="map-shell">
     <div class="intro-chip">JJTG ARCHIVE</div>
+
+    <div class="mobile-archive">
+      <div class="mobile-archive-header">
+        <p class="panel-kicker">Travel Archive</p>
+        <h1>여행 기록<br>아카이브</h1>
+        <p>모바일에서는 날짜 순으로 정리한 여행 리스트를 바로 보고, 원하는 여행 사이트로 편하게 들어갈 수 있어요.</p>
+      </div>
+      <section id="mobile-archive-list" class="mobile-archive-list" aria-label="모바일 여행 목록"></section>
+    </div>
+
     <svg id="world-map" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid meet" aria-label="세계지도"></svg>
 
-    <aside id="archive-panel" class="archive-panel" aria-label="중국 여행 아카이브">
+    <aside id="archive-panel" class="archive-panel" aria-label="여행 아카이브 패널">
       <div class="panel-top">
         <div>
           <p class="panel-kicker">Country Archive</p>
@@ -259,7 +375,6 @@
         <span>2026.04.30 - 2026.05.06</span>
         <a href="./china-2026/index.html">사이트 이동</a>
       </div>
-
     </aside>
   </div>
 
@@ -297,13 +412,55 @@
       }
     };
 
+    const MOBILE_ARCHIVES = [
+      {
+        country: "Korea",
+        title: "경상북도 경주",
+        date: "2026.03.06 - 03.07",
+        route: "경주 황리단길 · 감포 문무대왕릉",
+        note: "",
+        href: "",
+        actionLabel: ""
+      },
+      {
+        country: "Korea",
+        title: "강원도 영월",
+        date: "2026.04.04 - 04.05",
+        route: "청령포 · 돌개구멍",
+        note: "",
+        href: "",
+        actionLabel: ""
+      },
+      {
+        country: "China",
+        title: "쿤밍, 리장, 샹그릴라",
+        date: "2026.04.30 - 2026.05.06",
+        route: "쿤밍 → 리장 → 샹그릴라",
+        note: "운남 여행 기록 사이트로 바로 이동할 수 있어요.",
+        href: "./china-2026/index.html",
+        actionLabel: "사이트 이동"
+      },
+      {
+        country: "Korea",
+        title: "제주도",
+        date: "2026.06.03 - 06.06",
+        route: "제주공항 → 서귀포 → 성산",
+        note: "제주 여행 사이트로 바로 이동할 수 있어요.",
+        href: "./jeju-2026/index.html",
+        actionLabel: "사이트 이동"
+      }
+    ];
+
     const svg = d3.select("#world-map");
     const panel = document.getElementById("archive-panel");
     const panelTitle = document.getElementById("panel-title");
     const panelCopy = document.getElementById("panel-copy");
     const closeButton = document.getElementById("panel-close");
+    const mobileArchiveList = document.getElementById("mobile-archive-list");
     const width = 1600;
     const height = 900;
+
+    renderMobileArchive();
 
     const projection = d3.geoNaturalEarth1()
       .fitExtent([[4, 4], [width - 4, height - 4]], { type: "Sphere" });
@@ -321,7 +478,7 @@
       .then((world) => {
         const countries = topojson.feature(world, world.objects.countries).features;
 
-        const selection = svg.append("g")
+        svg.append("g")
           .selectAll("path")
           .data(countries)
           .join("path")
@@ -359,6 +516,28 @@
     closeButton.addEventListener("click", () => {
       closeArchive();
     });
+
+    function renderMobileArchive() {
+      mobileArchiveList.innerHTML = MOBILE_ARCHIVES.map((item) => {
+        const actionMarkup = item.href
+          ? `<a class="mobile-card-action" href="${item.href}">${item.actionLabel}</a>`
+          : item.actionLabel
+            ? `<span class="mobile-card-action is-disabled">${item.actionLabel}</span>`
+            : "";
+        const noteMarkup = item.note ? `<div class="mobile-card-note">${item.note}</div>` : "";
+
+        return `
+          <article class="mobile-card">
+            <span class="mobile-card-kind">${item.country}</span>
+            <h2>${item.title}</h2>
+            <div class="mobile-card-date">${item.date}</div>
+            <div class="mobile-card-route">${item.route}</div>
+            ${noteMarkup}
+            ${actionMarkup}
+          </article>
+        `;
+      }).join("");
+    }
 
     function openArchive(archive) {
       panelTitle.textContent = archive.title;
