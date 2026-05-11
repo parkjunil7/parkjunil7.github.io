@@ -3,170 +3,387 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>JJTG | 홈/개요</title>
+  <title>JJTG | Archive</title>
   <link rel="icon" type="image/png" sizes="32x32" href="jijun_favicon_32.png">
   <link rel="icon" type="image/png" sizes="64x64" href="jijun_favicon_64.png">
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css">
+  <style>
+    :root {
+      --sea-top: #def4f8;
+      --sea-bottom: #edf8fb;
+      --land: #bdbdbf;
+      --land-stroke: rgba(74, 88, 100, 0.12);
+      --trip-fill: #f6b264;
+      --trip-stroke: #ee6c3f;
+      --trip-shadow: rgba(239, 108, 63, 0.22);
+      --trip-fill-alt: #8fd6e0;
+      --trip-stroke-alt: #257891;
+      --trip-shadow-alt: rgba(37, 120, 145, 0.2);
+      --panel: rgba(255, 255, 255, 0.92);
+      --panel-line: rgba(13, 99, 127, 0.12);
+      --text: #203040;
+      --muted: #698091;
+      --accent: #0d637f;
+      --accent-soft: #d8eef3;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      margin: 0;
+      min-height: 100%;
+    }
+
+    body {
+      overflow: hidden;
+      font-family: "Noto Sans KR", "Segoe UI", sans-serif;
+      background:
+        radial-gradient(circle at top left, rgba(110, 214, 221, 0.28), transparent 24%),
+        radial-gradient(circle at right 18%, rgba(13, 99, 127, 0.12), transparent 18%),
+        linear-gradient(180deg, #f7fbfc 0%, #eef6f8 100%);
+    }
+
+    .map-shell {
+      position: relative;
+      width: 100vw;
+      height: 100vh;
+      background: linear-gradient(180deg, var(--sea-top) 0%, var(--sea-bottom) 100%);
+    }
+
+    #world-map {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+
+    .sphere {
+      fill: rgba(255, 255, 255, 0.45);
+      stroke: rgba(40, 53, 63, 0.9);
+      stroke-width: 1.2;
+    }
+
+    .country {
+      fill: var(--land);
+      stroke: var(--land-stroke);
+      stroke-width: 0.55;
+      vector-effect: non-scaling-stroke;
+      transition: fill 0.18s ease, opacity 0.18s ease;
+    }
+
+    .country.trip {
+      fill: var(--trip-fill);
+      stroke: var(--trip-stroke);
+      stroke-width: 1.6;
+      filter: drop-shadow(0 14px 22px var(--trip-shadow));
+      cursor: pointer;
+    }
+
+    .country.trip.secondary {
+      fill: var(--trip-fill-alt);
+      stroke: var(--trip-stroke-alt);
+      filter: drop-shadow(0 14px 22px var(--trip-shadow-alt));
+    }
+
+    .country.trip:hover,
+    .country.trip.is-active {
+      fill: #f8be79;
+    }
+
+    .country.trip.secondary:hover,
+    .country.trip.secondary.is-active {
+      fill: #a7e0e7;
+    }
+
+    .intro-chip {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      z-index: 3;
+      padding: 12px 16px;
+      border: 1px solid var(--panel-line);
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.88);
+      color: var(--accent);
+      font-size: 0.92rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      backdrop-filter: blur(10px);
+      box-shadow: 0 18px 34px rgba(31, 59, 78, 0.08);
+    }
+
+    .archive-panel {
+      position: absolute;
+      top: 0;
+      right: 0;
+      z-index: 4;
+      width: min(420px, 100vw);
+      height: 100%;
+      padding: 28px 22px 24px;
+      border-left: 1px solid var(--panel-line);
+      background: var(--panel);
+      backdrop-filter: blur(14px);
+      box-shadow: -18px 0 40px rgba(31, 59, 78, 0.08);
+      transform: translateX(100%);
+      transition: transform 0.34s ease;
+      overflow-y: auto;
+    }
+
+    .archive-panel.is-open {
+      transform: translateX(0);
+    }
+
+    .panel-top {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 16px;
+    }
+
+    .panel-kicker {
+      margin: 0 0 8px;
+      color: var(--accent);
+      font-size: 0.84rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .panel-title {
+      margin: 0;
+      color: var(--text);
+      font-size: 2rem;
+      line-height: 1;
+    }
+
+    .panel-copy {
+      margin-top: 28px;
+      padding: 22px 20px;
+      border: 1px solid rgba(13, 99, 127, 0.12);
+      border-radius: 24px;
+      background: linear-gradient(180deg, rgba(235, 248, 250, 0.9), rgba(255, 255, 255, 0.96));
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.7);
+    }
+
+    .panel-copy strong {
+      display: block;
+      color: var(--text);
+      font-size: 1.25rem;
+      line-height: 1.5;
+    }
+
+    .panel-copy span {
+      display: block;
+      margin-top: 10px;
+      color: var(--accent);
+      font-size: 0.96rem;
+      font-weight: 700;
+    }
+
+    .panel-copy .archive-stop {
+      display: block;
+    }
+
+    .panel-copy .archive-stop + .archive-stop {
+      margin-top: 22px;
+    }
+
+    .panel-copy .archive-place {
+      display: block;
+      color: var(--text);
+      font-size: 1.25rem;
+      font-weight: 700;
+      line-height: 1.5;
+    }
+
+    .panel-copy .archive-period {
+      display: block;
+      margin-top: 8px;
+      color: var(--accent);
+      font-size: 0.96rem;
+      font-weight: 700;
+    }
+
+    .panel-copy a {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      margin-top: 18px;
+      padding: 11px 16px;
+      border-radius: 999px;
+      background: var(--accent);
+      color: white;
+      text-decoration: none;
+      font-weight: 700;
+    }
+
+    @media (max-width: 980px) {
+      .intro-chip {
+        top: 12px;
+        left: 12px;
+        font-size: 0.82rem;
+      }
+
+      .archive-panel {
+        width: 100%;
+        padding: 18px 16px 24px;
+      }
+
+      .panel-title {
+        font-size: 1.7rem;
+      }
+
+      .panel-copy {
+        margin-top: 22px;
+        padding: 18px 16px;
+      }
+    }
+  </style>
 </head>
-<body data-page="home">
-  <div class="site-shell">
-    <header class="topbar">
-      <a class="brand" href="index.html">
-        <span class="brand-mark" aria-hidden="true"><img src="jijun_favicon_64.png" alt=""></span>
-        <span>
-          <strong>JJTG</strong>
-          <small>쿤밍 · 리장 · 샹그릴라 여행</small>
-        </span>
-      </a>
-      <nav class="nav">
-        <a href="index.html">홈/개요</a>
-        <a href="schedule.html">여행 일정표</a>
-        <a href="records.html">여행 기록</a>
-        <a href="details.html">체크리스트</a>
-        <a href="budget.html">지출</a>
-      </nav>
-    </header>
+<body>
+  <div class="map-shell">
+    <div class="intro-chip">JJTG ARCHIVE</div>
+    <svg id="world-map" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid meet" aria-label="세계지도"></svg>
 
-    <main>
-      <section class="hero scenic-hero">
-        <div class="hero-copy">
-          <p class="eyebrow">Yunnan China · 2026</p>
-          <h1>하늘과 설산 사이,<br>윈난으로</h1>
-          <p class="hero-text">
-            4월 30일부터 5월 6일까지, 쿤밍에서 시작해 리장과 샹그릴라로 이어지는 여행의 순간을
-            한곳에 담았습니다.
-          </p>
-          <div class="hero-dday">
-            <span class="hero-dday-label">D-Day</span>
-            <strong id="home-dday-value">D-0</strong>
-          </div>
-          <div class="hero-actions">
-            <a class="button primary" href="schedule.html">일정표 보기</a>
-            <a class="button secondary" href="details.html">체크리스트 보기</a>
-          </div>
-          <div class="hero-badges">
-            <span class="pill">4.30 - 5.06</span>
-            <span class="pill">Kunming</span>
-            <span class="pill">Lijiang</span>
-            <span class="pill">Shangri-La</span>
-          </div>
+    <aside id="archive-panel" class="archive-panel" aria-label="중국 여행 아카이브">
+      <div class="panel-top">
+        <div>
+          <p class="panel-kicker">Country Archive</p>
+          <h2 id="panel-title" class="panel-title">China</h2>
         </div>
+        <button id="panel-close" class="panel-close" type="button" aria-label="패널 닫기">×</button>
+      </div>
+      <div id="panel-copy" class="panel-copy">
+        <strong>쿤밍, 리장, 샹그릴라</strong>
+        <span>2026.04.30 - 2026.05.06</span>
+        <a href="./china-2026/index.html">사이트 이동</a>
+      </div>
 
-        <div class="hero-visual">
-          <article class="photo-card photo-card-main">
-            <div class="photo-card-label">
-              <span>대표 풍경</span>
-              <strong>리장 · 옥룡설산 무드</strong>
-            </div>
-          </article>
-          <article class="photo-card photo-card-side">
-            <div class="photo-card-label">
-              <span>스테이 뷰</span>
-              <strong>산맥과 구름이 보이는 숙소 감성</strong>
-            </div>
-          </article>
-        </div>
-      </section>
-
-      <section class="overview-strip">
-        <article class="overview-card">
-          <span class="label">여행 기간</span>
-          <strong>2026.04.30 Thu - 2026.05.06 Wed</strong>
-        </article>
-        <article class="overview-card">
-          <span class="label">여행 도시</span>
-          <strong>쿤밍 · 리장 · 샹그릴라</strong>
-        </article>
-        <article class="overview-card">
-          <span class="label">여행 테마</span>
-          <strong>별빛 · 설산 · 힐링</strong>
-        </article>
-      </section>
-
-      <section class="panel accent route-panel map-panel">
-        <div class="panel-head">
-          <p class="eyebrow">Route Map</p>
-          <h2>이동 경로</h2>
-        </div>
-        <div id="travel-map" class="travel-map" aria-label="인천공항에서 쿤밍, 리장, 샹그릴라로 이어지는 여행 경로 지도"></div>
-        <p class="route-caption">인천공항에서 출발해 쿤밍, 리장, 샹그릴라까지 이어지는 이동 동선을 실제 지도 위에서 확인할 수 있습니다.</p>
-        <div class="route-summary">
-          <article class="route-summary-card">
-            <span class="route-summary-kind">항공</span>
-            <strong>인천공항 → 쿤밍</strong>
-            <p>예상 4시간 5분</p>
-          </article>
-          <article class="route-summary-card">
-            <span class="route-summary-kind">기차</span>
-            <strong>쿤밍 → 리장</strong>
-            <p>예상 4시간</p>
-          </article>
-          <article class="route-summary-card">
-            <span class="route-summary-kind">차량</span>
-            <strong>리장 → 샹그릴라</strong>
-            <p>예상 2시간</p>
-          </article>
-        </div>
-      </section>
-
-      <section class="panel destinations-panel">
-        <div class="panel-head">
-          <p class="eyebrow">Destinations</p>
-          <h2>도시별 무드</h2>
-        </div>
-        <div class="feature-grid">
-          <article class="feature-card destination-card">
-            <span class="city-tag">Kunming</span>
-            <h3>쿤밍</h3>
-            <p>여행의 시작점. 비교적 온화한 날씨와 도착 후 동선 정리에 좋은 도시입니다.</p>
-          </article>
-          <article class="feature-card destination-card">
-            <span class="city-tag">Lijiang</span>
-            <h3>리장</h3>
-            <p>설산과 호수, 고성이 함께 어우러지는 핵심 하이라이트 지역입니다.</p>
-          </article>
-          <article class="feature-card destination-card">
-            <span class="city-tag">Shangri-La</span>
-            <h3>샹그릴라</h3>
-            <p>고지대의 시원한 공기와 넓은 풍경, 느긋한 체류 감성이 매력적인 곳입니다.</p>
-          </article>
-        </div>
-      </section>
-
-      <section class="panel">
-        <div class="panel-head">
-          <p class="eyebrow">Quick Access</p>
-          <h2>페이지 바로가기</h2>
-        </div>
-        <div class="feature-grid">
-          <a class="feature-card" href="schedule.html">
-            <h3>여행 일정표</h3>
-            <p>날짜 순서대로 전체 흐름을 빠르게 확인합니다.</p>
-          </a>
-          <a class="feature-card" href="records.html">
-            <h3>여행 기록</h3>
-            <p>일정 아래에 사진을 올리고 하루별 기록으로 모아볼 수 있습니다.</p>
-          </a>
-          <a class="feature-card" href="details.html">
-            <h3>체크리스트</h3>
-            <p>출발 전 준비물과 해야 할 일을 한눈에 확인합니다.</p>
-          </a>
-          <a class="feature-card" href="budget.html">
-            <h3>지출</h3>
-            <p>총 지출을 한눈에 확인합니다.</p>
-          </a>
-        </div>
-      </section>
-    </main>
+    </aside>
   </div>
 
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="supabase-config.js"></script>
-  <script src="script.js?v=20260421-auth-sequence"></script>
+  <script src="https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/topojson-client@3/dist/topojson-client.min.js"></script>
+  <script>
+    const ARCHIVE_COUNTRIES = {
+      "156": {
+        title: "China",
+        href: "./china-2026/index.html",
+        className: "",
+        summary: "쿤밍, 리장, 샹그릴라",
+        date: "2026.04.30 - 2026.05.06"
+      },
+      "410": {
+        title: "Korea",
+        href: "#",
+        className: "secondary",
+        summary: `
+          <span class="archive-stop">
+            <span class="archive-place">경상북도 경주</span>
+            <span class="archive-period">2026.03.06 - 03.07</span>
+          </span>
+          <span class="archive-stop">
+            <span class="archive-place">강원도 영월</span>
+            <span class="archive-period">2026.04.04 - 04.05</span>
+          </span>
+          <span class="archive-stop">
+            <span class="archive-place">제주도</span>
+            <span class="archive-period">2026.06.03 - 06.06</span>
+          </span>
+        `,
+        date: ""
+      }
+    };
+
+    const svg = d3.select("#world-map");
+    const panel = document.getElementById("archive-panel");
+    const panelTitle = document.getElementById("panel-title");
+    const panelCopy = document.getElementById("panel-copy");
+    const closeButton = document.getElementById("panel-close");
+    const width = 1600;
+    const height = 900;
+
+    const projection = d3.geoNaturalEarth1()
+      .fitExtent([[4, 4], [width - 4, height - 4]], { type: "Sphere" });
+    const path = d3.geoPath(projection);
+
+    svg.append("path")
+      .datum({ type: "Sphere" })
+      .attr("class", "sphere")
+      .attr("d", path);
+
+    let activeCountryPath = null;
+
+    fetch("https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json")
+      .then((response) => response.json())
+      .then((world) => {
+        const countries = topojson.feature(world, world.objects.countries).features;
+
+        const selection = svg.append("g")
+          .selectAll("path")
+          .data(countries)
+          .join("path")
+          .attr("class", (d) => {
+            const archive = ARCHIVE_COUNTRIES[String(d.id)];
+            if (!archive) {
+              return "country";
+            }
+            return `country trip ${archive.className}`.trim();
+          })
+          .attr("d", path)
+          .on("click", (event, d) => {
+            event.stopPropagation();
+
+            const archive = ARCHIVE_COUNTRIES[String(d.id)];
+
+            if (!archive) {
+              closeArchive();
+              return;
+            }
+
+            activeCountryPath = event.currentTarget;
+            openArchive(archive);
+          });
+      });
+
+    document.body.addEventListener("click", (event) => {
+      if (panel.contains(event.target)) {
+        return;
+      }
+
+      closeArchive();
+    });
+
+    closeButton.addEventListener("click", () => {
+      closeArchive();
+    });
+
+    function openArchive(archive) {
+      panelTitle.textContent = archive.title;
+
+      if (archive.date) {
+        panelCopy.innerHTML = `
+          <strong>${archive.summary}</strong>
+          <span>${archive.date}</span>
+          <a href="${archive.href}">사이트 이동</a>
+        `;
+      } else {
+        panelCopy.innerHTML = archive.summary;
+      }
+
+      panel.classList.add("is-open");
+      if (activeCountryPath) {
+        activeCountryPath.classList.add("is-active");
+      }
+    }
+
+    function closeArchive() {
+      panel.classList.remove("is-open");
+      if (activeCountryPath) {
+        activeCountryPath.classList.remove("is-active");
+      }
+    }
+  </script>
 </body>
 </html>
