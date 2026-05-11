@@ -180,7 +180,6 @@ if (currentPage === "login") {
           return;
         }
 
-        sessionStorage.setItem("showArrivalFlight", "1");
         window.location.replace(getNextPath());
       };
 
