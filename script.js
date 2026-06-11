@@ -51,6 +51,14 @@ const authClient =
   window.supabase?.createClient && authConfig.url && authConfig.anonKey
     ? window.supabase.createClient(authConfig.url, authConfig.anonKey)
     : null;
+const authPendingTimeoutMs = 5000;
+
+const getCurrentPagePath = () => window.location.pathname.split("/").pop() || "index.html";
+
+const redirectToLogin = () => {
+  const nextPath = getCurrentPagePath();
+  window.location.replace(`login.html?next=${encodeURIComponent(nextPath)}`);
+};
 
 const getNextPath = () => {
   const next = new URLSearchParams(window.location.search).get("next");
@@ -195,22 +203,45 @@ if (protectedPages.has(currentPage)) {
   document.documentElement.classList.add("auth-pending");
 
   if (authClient) {
-    authClient.auth.getSession().then(({ data }) => {
-      if (!data.session) {
-        const nextPath = window.location.pathname.split("/").pop() || "index.html";
-        window.location.replace(`login.html?next=${encodeURIComponent(nextPath)}`);
+    let hasResolvedInitialSession = false;
+    const fallbackTimer = window.setTimeout(() => {
+      if (!hasResolvedInitialSession) {
+        redirectToLogin();
+      }
+    }, authPendingTimeoutMs);
+
+    authClient.auth.getSession().then(({ data, error }) => {
+      if (hasResolvedInitialSession) {
+        return;
+      }
+
+      hasResolvedInitialSession = true;
+      window.clearTimeout(fallbackTimer);
+
+      if (error || !data.session) {
+        redirectToLogin();
         return;
       }
 
       ensureLogoutButton(data.session);
       document.documentElement.classList.remove("auth-pending");
       playArrivalOverlay();
+    }).catch(() => {
+      if (hasResolvedInitialSession) {
+        return;
+      }
+
+      hasResolvedInitialSession = true;
+      window.clearTimeout(fallbackTimer);
+      redirectToLogin();
     });
 
     authClient.auth.onAuthStateChange((_event, session) => {
+      hasResolvedInitialSession = true;
+      window.clearTimeout(fallbackTimer);
+
       if (!session) {
-        const nextPath = window.location.pathname.split("/").pop() || "index.html";
-        window.location.replace(`login.html?next=${encodeURIComponent(nextPath)}`);
+        redirectToLogin();
         return;
       }
 
@@ -218,6 +249,8 @@ if (protectedPages.has(currentPage)) {
       document.documentElement.classList.remove("auth-pending");
       playArrivalOverlay();
     });
+  } else {
+    redirectToLogin();
   }
 }
 
