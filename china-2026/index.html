@@ -6,6 +6,27 @@
   <title>JJTG | 홈/개요</title>
   <link rel="icon" type="image/png" sizes="32x32" href="jijun_favicon_32.png">
   <link rel="icon" type="image/png" sizes="64x64" href="jijun_favicon_64.png">
+  <script>
+    (function () {
+      const nextPath = window.location.pathname.split("/").pop() || "index.html";
+      const projectRef = "wphdhiowhivefokivfql";
+      const authKeys = [`sb-${projectRef}-auth-token`, "supabase.auth.token"];
+      let hasSession = false;
+
+      try {
+        hasSession = authKeys.some((key) => {
+          const value = window.localStorage.getItem(key);
+          return typeof value === "string" && value.length > 0 && value !== "null";
+        });
+      } catch (_error) {
+        hasSession = false;
+      }
+
+      if (!hasSession) {
+        window.location.replace(`login.html?next=${encodeURIComponent(nextPath)}`);
+      }
+    })();
+  </script>
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>

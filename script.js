@@ -51,7 +51,7 @@ const authClient =
   window.supabase?.createClient && authConfig.url && authConfig.anonKey
     ? window.supabase.createClient(authConfig.url, authConfig.anonKey)
     : null;
-const authPendingTimeoutMs = 5000;
+const authPendingTimeoutMs = 1500;
 
 const getCurrentPagePath = () => window.location.pathname.split("/").pop() || "index.html";
 

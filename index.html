@@ -6,6 +6,30 @@
   <title>JJTG | Archive</title>
   <link rel="icon" type="image/png" sizes="32x32" href="jijun_favicon_32.png">
   <link rel="icon" type="image/png" sizes="64x64" href="jijun_favicon_64.png">
+  <script>
+    (function () {
+      const nextPath = window.location.pathname.split("/").pop() || "index.html";
+      const projectRef = "wphdhiowhivefokivfql";
+      const authKeys = [`sb-${projectRef}-auth-token`, "supabase.auth.token"];
+      let hasSession = false;
+
+      try {
+        hasSession = authKeys.some((key) => {
+          const value = window.localStorage.getItem(key);
+          return typeof value === "string" && value.length > 0 && value !== "null";
+        });
+      } catch (_error) {
+        hasSession = false;
+      }
+
+      if (!hasSession) {
+        window.location.replace(`login.html?next=${encodeURIComponent(nextPath)}`);
+        return;
+      }
+
+      document.documentElement.classList.add("auth-pending");
+    })();
+  </script>
   <style>
     html.auth-pending body[data-page="home"] {
       visibility: hidden;
@@ -381,10 +405,11 @@
     </aside>
   </div>
 
-  <script src="https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/topojson-client@3/dist/topojson-client.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="supabase-config.js"></script>
+  <script src="script.js?v=20260611-root-auth-fast"></script>
+  <script src="https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/topojson-client@3/dist/topojson-client.min.js"></script>
   <script>
     const ARCHIVE_COUNTRIES = {
       "156": {
@@ -577,6 +602,5 @@
       }
     });
   </script>
-  <script src="script.js?v=20260511-root-auth"></script>
 </body>
 </html>

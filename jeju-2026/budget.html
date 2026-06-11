@@ -6,6 +6,27 @@
   <title>JJTG | 지출</title>
   <link rel="icon" type="image/png" sizes="32x32" href="jijun_favicon_32.png">
   <link rel="icon" type="image/png" sizes="64x64" href="jijun_favicon_64.png">
+  <script>
+    (function () {
+      const nextPath = window.location.pathname.split("/").pop() || "index.html";
+      const projectRef = "wphdhiowhivefokivfql";
+      const authKeys = [`sb-${projectRef}-auth-token`, "supabase.auth.token"];
+      let hasSession = false;
+
+      try {
+        hasSession = authKeys.some((key) => {
+          const value = window.localStorage.getItem(key);
+          return typeof value === "string" && value.length > 0 && value !== "null";
+        });
+      } catch (_error) {
+        hasSession = false;
+      }
+
+      if (!hasSession) {
+        window.location.replace(`login.html?next=${encodeURIComponent(nextPath)}`);
+      }
+    })();
+  </script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
