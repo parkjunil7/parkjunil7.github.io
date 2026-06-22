@@ -34,8 +34,7 @@ html.auth-pending body[data-page="home"],
 html.auth-pending body[data-page="schedule"],
 html.auth-pending body[data-page="records"],
 html.auth-pending body[data-page="details"],
-html.auth-pending body[data-page="budget"],
-html.auth-pending body[data-page="login"] {
+html.auth-pending body[data-page="budget"] {
   visibility: hidden;
 }
 

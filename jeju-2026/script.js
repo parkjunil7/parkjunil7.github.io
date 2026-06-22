@@ -14,6 +14,9 @@ const loginAliases = {
   "영재준일": "junil@jijun-trip.local",
 };
 
+loginAliases["\uCC9C\uC7AC\uC9C0\uC601"] = "jiyoung@jijun-trip.local";
+loginAliases["\uC601\uC7AC\uC900\uC77C"] = "junil@jijun-trip.local";
+
 const isValidTime = (value) => /^([01]\d|2[0-3]):([0-5]\d)$/.test(value);
 const normalizeTime = (value) => String(value || "").trim();
 const departureDate = "2026-06-03";
@@ -127,8 +130,6 @@ const ensureLogoutButton = (session) => {
 };
 
 if (currentPage === "login") {
-  document.documentElement.classList.add("auth-pending");
-
   const loginForm = document.getElementById("login-form");
   const loginError = document.getElementById("login-error");
 
@@ -150,7 +151,6 @@ if (currentPage === "login") {
         window.location.replace(getNextPath());
         return;
       }
-      document.documentElement.classList.remove("auth-pending");
     });
 
     loginForm?.addEventListener("submit", (event) => {
