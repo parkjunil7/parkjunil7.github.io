@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>JJTG | 강릉 체크리스트</title>
+  <link rel="icon" type="image/png" sizes="32x32" href="jijun_favicon_32.png">
+  <link rel="icon" type="image/png" sizes="64x64" href="jijun_favicon_64.png">
+  <script>
+    (function () {
+      const nextPath = window.location.pathname.split("/").pop() || "index.html";
+      const projectRef = "wphdhiowhivefokivfql";
+      const authKeys = [`sb-${projectRef}-auth-token`, "supabase.auth.token"];
+      let hasSession = false;
+      try {
+        hasSession = authKeys.some((key) => {
+          const value = window.localStorage.getItem(key);
+          return typeof value === "string" && value.length > 0 && value !== "null";
+        });
+      } catch (_error) {
+        hasSession = false;
+      }
+      if (!hasSession) {
+        window.location.replace(`login.html?next=${encodeURIComponent(nextPath)}`);
+      }
+    })();
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body data-page="details">
+  <div class="site-shell">
+    <header class="topbar">
+      <a class="brand" href="index.html">
+        <span class="brand-mark" aria-hidden="true"><img src="jijun_favicon_64.png" alt=""></span>
+        <span>
+          <strong>JJTG</strong>
+          <small>강원도 강릉 여행</small>
+        </span>
+      </a>
+      <nav class="nav">
+        <a href="../index.html">세계지도</a>
+        <a href="index.html">홈/개요</a>
+        <a href="schedule.html">여행 일정표</a>
+        <a href="records.html">여행 기록</a>
+        <a href="details.html">체크리스트</a>
+        <a href="budget.html">지출</a>
+      </nav>
+    </header>
+
+    <main>
+      <section class="page-header">
+        <p class="eyebrow">Shared Checklist</p>
+        <h1>강릉 체크리스트</h1>
+        <p>숙소, 짐, 출발 준비를 같이 체크하면서 강릉 여행 전 할 일을 정리할 수 있습니다.</p>
+      </section>
+
+      <section class="grid checklist-layout">
+        <article class="panel checklist-summary-panel">
+          <div class="panel-head">
+            <p class="eyebrow">Progress</p>
+            <h2>준비 현황</h2>
+          </div>
+          <div class="checklist-progress">
+            <strong id="checklist-progress-count">0 / 0 완료</strong>
+            <div class="bar"><span id="checklist-progress-bar" style="width: 0%"></span></div>
+            <p id="checklist-progress-copy" class="budget-empty">출발 전 체크할 항목을 정리하고 있어요.</p>
+          </div>
+        </article>
+
+        <article class="checklist-sidecards">
+          <section class="panel checklist-info-card">
+            <div class="panel-head">
+              <p class="eyebrow">Departure</p>
+              <h2>D-Day</h2>
+            </div>
+            <div class="checklist-dday">
+              <strong id="checklist-dday-value">D-0</strong>
+              <p id="checklist-dday-copy" class="budget-empty">출발 날짜 기준으로 자동 계산됩니다.</p>
+            </div>
+          </section>
+
+          <section class="panel checklist-info-card">
+            <div class="panel-head">
+              <p class="eyebrow">Focus</p>
+              <h2>아직 남은 체크</h2>
+            </div>
+            <ul id="checklist-pending-list" class="checklist-pending-list"></ul>
+          </section>
+        </article>
+
+        <article id="checklist-setup-notice" class="panel setup-notice is-hidden">
+          <div class="panel-head">
+            <p class="eyebrow">Supabase Setup</p>
+            <h2>체크리스트용 테이블 생성 필요</h2>
+          </div>
+          <p class="setup-copy">
+            Supabase에 <code>trip_checklist_items</code> 테이블이 준비되면 강릉 체크리스트도 바로 동작합니다.
+          </p>
+        </article>
+      </section>
+
+      <section id="checklist-groups" class="checklist-groups"></section>
+    </main>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase-config.js"></script>
+  <script src="script.js?v=20260624-gangneung-launch"></script>
+</body>
+</html>
