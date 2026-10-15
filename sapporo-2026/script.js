@@ -536,15 +536,8 @@ if (currentPage === "details") {
   let checklistItems = [];
   const departureDate = "2026-12-31";
 
+  const excludedChecklistSlugs = new Set(["travel-documents", "power-bank"]);
   const defaultChecklistItems = [
-    {
-      trip_key: tripKey,
-      slug: "travel-documents",
-      category: "출발 전",
-      title: "필수 서류 챙기기",
-      note: "여권, 항공권, 호텔 예약내역, 여행자보험 가입내역 확인",
-      sort_order: 10,
-    },
     {
       trip_key: tripKey,
       slug: "travel-insurance",
@@ -560,14 +553,6 @@ if (currentPage === "details") {
       title: "eSIM 또는 로밍 설정하기",
       note: "출국 전 개통 방식과 현지 데이터 사용 가능 여부 확인",
       sort_order: 30,
-    },
-    {
-      trip_key: tripKey,
-      slug: "power-bank",
-      category: "준비물",
-      title: "보조배터리 확인하기",
-      note: "용량, 충전 상태와 이용 항공사의 반입 기준 확인",
-      sort_order: 40,
     },
     {
       trip_key: tripKey,
@@ -732,7 +717,7 @@ if (currentPage === "details") {
       return;
     }
 
-    checklistItems = data || [];
+    checklistItems = (data || []).filter((item) => !excludedChecklistSlugs.has(item.slug));
     renderChecklist();
   };
 
