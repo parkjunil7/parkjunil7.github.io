@@ -75,7 +75,15 @@
         <article class="overview-card"><span class="label">여행 준비</span><strong>항공 · 숙소 · 세부 일정 미정</strong></article>
       </section>
       <section class="panel"><div class="panel-head"><p class="eyebrow">Six Winter Days</p><h2>5박 6일, 함께 채울 일정</h2></div><p class="muted">아직 정해지지 않은 일정은 비워두었어요. 여행 일정표에서 날짜별 계획을 추가하세요.</p><div class="feature-grid"><article class="feature-card"><span class="city-tag">DAY 1 · 12.31 목</span><h3>2026년의 마지막 날</h3><p>세부 일정 미정</p></article><article class="feature-card"><span class="city-tag">DAY 2 · 01.01 금</span><h3>새해 첫날</h3><p>세부 일정 미정</p></article><article class="feature-card"><span class="city-tag">DAY 3 · 01.02 토</span><h3>삿포로에서의 하루</h3><p>세부 일정 미정</p></article><article class="feature-card"><span class="city-tag">DAY 4 · 01.03 일</span><h3>삿포로에서의 하루</h3><p>세부 일정 미정</p></article><article class="feature-card"><span class="city-tag">DAY 5 · 01.04 월</span><h3>삿포로에서의 하루</h3><p>세부 일정 미정</p></article><article class="feature-card"><span class="city-tag">DAY 6 · 01.05 화</span><h3>여행의 마지막 날</h3><p>세부 일정 미정</p></article></div></section>
-      <section class="panel map-panel"><div class="panel-head"><p class="eyebrow">Destination Map</p><h2>이번 여행은 삿포로</h2></div><div id="travel-map" class="travel-map" aria-label="삿포로 위치 지도"></div><p class="route-caption">여행지 위치를 확인하는 지도입니다. 이동 경로는 예약 후 일정표에 추가하세요.</p></section>
+      <section class="panel accent route-panel map-panel">
+        <div class="panel-head"><p class="eyebrow">Route Map</p><h2>이동 경로</h2></div>
+        <div id="travel-map" class="travel-map" aria-label="인천공항에서 신치토세공항을 거쳐 삿포로로 이어지는 여행 경로 지도"></div>
+        <p class="route-caption">인천공항 → 신치토세공항 → 삿포로의 예정 이동 경로입니다. 지도 선은 지점을 연결한 개략도이며, 항공편과 현지 교통편은 예약 후 확정해요.</p>
+        <div class="route-summary">
+          <article class="route-summary-card"><span class="route-summary-kind">항공</span><strong>인천공항 → 신치토세공항</strong><p>항공편 · 출도착 시간 미정</p></article>
+          <article class="route-summary-card"><span class="route-summary-kind">현지 이동</span><strong>신치토세공항 → 삿포로</strong><p>교통편 · 이동 시간 미정</p></article>
+        </div>
+      </section>
       <section class="panel"><div class="panel-head"><p class="eyebrow">Our Travel Notebook</p><h2>여행 준비부터 기록까지</h2></div><div class="feature-grid">
         <a class="feature-card" href="schedule.html"><h3>여행 일정표</h3><p>날짜와 시간별로 우리 일정을 작성해요.</p></a>
         <a class="feature-card" href="records.html"><h3>여행 기록</h3><p>일정에 사진과 추억을 남겨요.</p></a>
@@ -88,6 +96,6 @@
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="supabase-config.js"></script>
-  <script src="script.js?v=20261015-sapporo"></script>
+  <script src="script.js?v=20261015-sapporo-route"></script>
 </body>
 </html>

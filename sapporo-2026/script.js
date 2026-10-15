@@ -2328,11 +2328,45 @@ if (currentPage === "records") {
 if (currentPage === "home" && window.L) {
   const element = document.getElementById("travel-map");
   if (element) {
-    const map = L.map(element, { scrollWheelZoom: false }).setView([43.0618, 141.3545], 12);
+    const route = [
+      { name: "인천공항", coords: [37.4602, 126.4407], direction: "top", offset: [0, -12] },
+      { name: "신치토세공항", coords: [42.7752, 141.6923], direction: "bottom", offset: [0, 14] },
+      { name: "삿포로", coords: [43.0618, 141.3545], direction: "top", offset: [0, -12] },
+    ];
+    const map = L.map(element, { scrollWheelZoom: false });
     L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
       attribution: "&copy; OpenStreetMap contributors"
     }).addTo(map);
-    L.circleMarker([43.0618, 141.3545], { radius: 9, color: "#315a83", fillOpacity: 0.8 })
-      .addTo(map).bindTooltip("삿포로", { permanent: true });
+    L.polyline([route[0].coords, route[1].coords], {
+      color: "#315a83", weight: 4, opacity: 0.94, dashArray: "10 10",
+    }).addTo(map);
+    L.polyline([route[1].coords, route[2].coords], {
+      color: "#0e8a95", weight: 4, opacity: 0.94,
+    }).addTo(map);
+
+    const planePoint = route[0].coords.map((value, index) =>
+      value + (route[1].coords[index] - value) * 0.55
+    );
+    const departurePoint = map.project(L.latLng(route[0].coords), 5);
+    const arrivalPoint = map.project(L.latLng(route[1].coords), 5);
+    const angle = Math.atan2(arrivalPoint.x - departurePoint.x, departurePoint.y - arrivalPoint.y) * 180 / Math.PI;
+    L.marker(planePoint, {
+      interactive: false,
+      icon: L.divIcon({
+        className: "route-plane-icon",
+        html: `<div><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" style="transform:rotate(${angle}deg)"><path d="M21 15.6V13.8L13.4 9.3V4.35C13.4 3.55 12.76 2.9 11.95 2.9C11.14 2.9 10.5 3.55 10.5 4.35V9.3L2.9 13.8V15.6L10.5 13.35V18.3L8.6 19.75V21.1L11.95 20.1L15.3 21.1V19.75L13.4 18.3V13.35L21 15.6Z" fill="currentColor"/></svg></div>`,
+        iconSize: [34, 34], iconAnchor: [17, 17],
+      }),
+    }).addTo(map);
+
+    route.forEach((point) => {
+      L.circleMarker(point.coords, {
+        radius: 7, color: "#315a83", weight: 3, fillColor: "#ffffff", fillOpacity: 1,
+      }).addTo(map).bindTooltip(point.name, {
+        permanent: true, direction: point.direction, offset: point.offset,
+        className: "route-city-label",
+      }).bindPopup(point.name);
+    });
+    map.fitBounds(L.latLngBounds(route.map((point) => point.coords)), { padding: [65, 65] });
   }
 }
