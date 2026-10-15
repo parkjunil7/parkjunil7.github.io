@@ -412,6 +412,13 @@
   <script src="https://cdn.jsdelivr.net/npm/topojson-client@3/dist/topojson-client.min.js"></script>
   <script>
     const ARCHIVE_COUNTRIES = {
+      "392": {
+        title: "Japan",
+        href: "./sapporo-2026/index.html",
+        className: "",
+        summary: "홋카이도 삿포로",
+        date: "2026.12.31 - 2027.01.05"
+      },
       "156": {
         title: "China",
         href: "./china-2026/index.html",
@@ -517,6 +524,11 @@
       actionLabel: ""
     });
 
+    MOBILE_ARCHIVES.push({
+      country: "Japan", title: "홋카이도 삿포로",
+      date: "2026.12.31 - 2027.01.05", route: "5박 6일 · 연말연시 여행",
+      note: "", href: "./sapporo-2026/index.html", actionLabel: "사이트 이동"
+    });
     const svg = d3.select("#world-map");
     const panel = document.getElementById("archive-panel");
     const panelTitle = document.getElementById("panel-title");

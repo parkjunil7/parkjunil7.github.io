@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>JJTG 삿포로 | 홈/개요</title>
+  <link rel="icon" type="image/png" sizes="32x32" href="jijun_favicon_32.png">
+  <link rel="icon" type="image/png" sizes="64x64" href="jijun_favicon_64.png">
+  <script>
+    (function () {
+      const nextPath = window.location.pathname.split("/").pop() || "index.html";
+      const projectRef = "wphdhiowhivefokivfql";
+      const authKeys = [`sb-${projectRef}-auth-token`, "supabase.auth.token"];
+      let hasSession = false;
+
+      try {
+        hasSession = authKeys.some((key) => {
+          const value = window.localStorage.getItem(key);
+          return typeof value === "string" && value.length > 0 && value !== "null";
+        });
+      } catch (_error) {
+        hasSession = false;
+      }
+
+      if (!hasSession) {
+        window.location.replace(`login.html?next=${encodeURIComponent(nextPath)}`);
+      }
+    })();
+  </script>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body data-page="home">
+  <div class="site-shell">
+    <header class="topbar">
+      <a class="brand" href="index.html">
+        <span class="brand-mark" aria-hidden="true"><img src="jijun_favicon_64.png" alt=""></span>
+        <span>
+          <strong>JJTG</strong>
+          <small>삿포로 연말연시 여행</small>
+        </span>
+      </a>
+      <nav class="nav">
+        <a href="../index.html">세계지도</a>
+        <a href="index.html">홈/개요</a>
+        <a href="schedule.html">여행 일정표</a>
+        <a href="records.html">여행 기록</a>
+        <a href="details.html">체크리스트</a>
+        <a href="budget.html">지출</a>
+      </nav>
+    </header>
+
+    <main>
+      <section class="hero scenic-hero sapporo-hero">
+        <div class="hero-copy">
+          <p class="eyebrow">Sapporo, Japan · Winter 2026–2027</p>
+          <h1>한 해의 끝,<br>새해의 시작은 삿포로.</h1>
+          <p class="hero-text">2026년 12월 31일부터 2027년 1월 5일까지.<br>함께 채워갈 5박 6일의 겨울 여행.</p>
+          <div class="hero-dday"><span class="hero-dday-label">D-Day</span><strong id="home-dday-value">—</strong></div>
+          <div class="hero-actions"><a class="button primary" href="schedule.html">일정 계획하기</a><a class="button secondary" href="details.html">준비물 확인</a></div>
+          <div class="hero-pills"><span class="pill">Sapporo</span><span class="pill">5박 6일</span><span class="pill">New Year</span></div>
+        </div>
+        <div class="winter-scene" role="img" aria-label="눈 내리는 삿포로의 겨울밤을 표현한 일러스트">
+          <span class="winter-moon"></span><div class="winter-snow">✦ · ˚ · ✧<br>· ˚ ✦ · ˚<br>˚ · ✧ · ✦</div>
+          <div class="winter-skyline"><i></i><i></i><i></i><i></i><i></i></div>
+          <div class="winter-caption"><span>OUR WINTER JOURNEY</span><strong>SAPPORO</strong><small>2026.12.31 — 2027.01.05</small></div>
+        </div>
+      </section>
+      <section class="overview-strip">
+        <article class="overview-card"><span class="label">여행 기간</span><strong>2026.12.31 – 2027.01.05</strong></article>
+        <article class="overview-card"><span class="label">여행지</span><strong>일본 · 홋카이도 · 삿포로</strong></article>
+        <article class="overview-card"><span class="label">여행 준비</span><strong>항공 · 숙소 · 세부 일정 미정</strong></article>
+      </section>
+      <section class="panel"><div class="panel-head"><p class="eyebrow">Six Winter Days</p><h2>5박 6일, 함께 채울 일정</h2></div><p class="muted">아직 정해지지 않은 일정은 비워두었어요. 여행 일정표에서 날짜별 계획을 추가하세요.</p><div class="feature-grid"><article class="feature-card"><span class="city-tag">DAY 1 · 12.31 목</span><h3>2026년의 마지막 날</h3><p>세부 일정 미정</p></article><article class="feature-card"><span class="city-tag">DAY 2 · 01.01 금</span><h3>새해 첫날</h3><p>세부 일정 미정</p></article><article class="feature-card"><span class="city-tag">DAY 3 · 01.02 토</span><h3>삿포로에서의 하루</h3><p>세부 일정 미정</p></article><article class="feature-card"><span class="city-tag">DAY 4 · 01.03 일</span><h3>삿포로에서의 하루</h3><p>세부 일정 미정</p></article><article class="feature-card"><span class="city-tag">DAY 5 · 01.04 월</span><h3>삿포로에서의 하루</h3><p>세부 일정 미정</p></article><article class="feature-card"><span class="city-tag">DAY 6 · 01.05 화</span><h3>여행의 마지막 날</h3><p>세부 일정 미정</p></article></div></section>
+      <section class="panel map-panel"><div class="panel-head"><p class="eyebrow">Destination Map</p><h2>이번 여행은 삿포로</h2></div><div id="travel-map" class="travel-map" aria-label="삿포로 위치 지도"></div><p class="route-caption">여행지 위치를 확인하는 지도입니다. 이동 경로는 예약 후 일정표에 추가하세요.</p></section>
+      <section class="panel"><div class="panel-head"><p class="eyebrow">Our Travel Notebook</p><h2>여행 준비부터 기록까지</h2></div><div class="feature-grid">
+        <a class="feature-card" href="schedule.html"><h3>여행 일정표</h3><p>날짜와 시간별로 우리 일정을 작성해요.</p></a>
+        <a class="feature-card" href="records.html"><h3>여행 기록</h3><p>일정에 사진과 추억을 남겨요.</p></a>
+        <a class="feature-card" href="details.html"><h3>체크리스트</h3><p>출발 전 준비할 일을 함께 확인해요.</p></a>
+        <a class="feature-card" href="budget.html"><h3>지출</h3><p>삿포로 여행 지출을 원화 기준으로 모아요.</p></a>
+      </div></section>
+    </main>
+  </div>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase-config.js"></script>
+  <script src="script.js?v=20261015-sapporo"></script>
+</body>
+</html>
