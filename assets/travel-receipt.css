@@ -1,6 +1,16 @@
 .ai-receipt {margin: 1rem 0; padding: .85rem 1rem; border: 1px solid #b9d4de; border-radius: 12px;}
 .ai-receipt summary {cursor:pointer; font-weight:700;}
 .ai-receipt p {line-height:1.5;}
-.ai-receipt .receipt-review {display:grid; gap:.7rem;}
+.ai-receipt .receipt-review {display:grid; grid-template-columns:minmax(0,1fr); gap:.7rem;}
+.receipt-review .form-field {min-width:0; grid-template-columns:minmax(0,1fr);}
+.receipt-review input[type="date"] {
+  -webkit-appearance:none;
+  appearance:none;
+  box-sizing:border-box;
+  width:100%;
+  min-width:0;
+  min-height:50px;
+}
+.receipt-review input[type="date"]::-webkit-date-and-time-value {text-align:left;}
 .ai-receipt [hidden] {display:none!important;}
 .ai-receipt input {max-width:100%; min-width:0;}
