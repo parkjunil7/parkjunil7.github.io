@@ -62,8 +62,8 @@ const playArrivalOverlay = () => {
       <p class="arrival-sequence arrival-sequence-2">함께라서 더 특별한, 우리의 첫 해외 기록.</p>
       <p class="arrival-sequence arrival-sequence-3">Hello! China!!</p>
       <div class="arrival-logo-sequence">
-        <span class="arrival-logo-word" aria-label="Travel LOG">
-          <span class="arrival-logo-letter">T</span><span class="arrival-logo-fill">ravel LO</span><span class="arrival-logo-letter">G</span>
+        <span class="arrival-logo-word" aria-label="Jiyeong and Junil Travel LOG">
+          <span class="arrival-logo-letter">J</span><span class="arrival-logo-fill">iyeong and </span><span class="arrival-logo-letter">J</span><span class="arrival-logo-fill">unil </span><span class="arrival-logo-letter">T</span><span class="arrival-logo-fill">ravel LO</span><span class="arrival-logo-letter">G</span>
         </span>
       </div>
     </div>
