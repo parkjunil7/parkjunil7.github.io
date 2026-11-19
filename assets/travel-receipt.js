@@ -8,10 +8,12 @@
   <p role="status" aria-live="polite"></p>
   <form class="receipt-review" hidden>
   <label class="form-field">항목명<input name="merchant" required maxlength="120"></label>
+  <label class="form-field">결제일<input name="spent_on" type="date"></label>
   <label class="form-field">분류<select name="category"></select></label>
   <label class="form-field">영수증 결제액<input name="original" type="number" step="any" min="0.000001" required></label>
   <label class="form-field">통화 코드<input name="currency" placeholder="예: JPY" maxlength="3" pattern="[A-Za-z]{3}" required></label>
   <label class="form-field">외화 1단위당 원화 환율<input name="rate" type="number" step="any" min="0.000001" placeholder="예: 100엔이 950원이면 9.5"></label>
+  <p class="rate-note" aria-live="polite"></p>
   <label class="form-field">등록할 원화 금액<input name="krw" type="number" step="1" min="1" max="2147483647" required placeholder="실제 원화 결제액 직접 입력 가능"></label>
   <button class="button primary">확인하고 입력칸에 반영</button></form>`;
   form.before(panel);
@@ -27,7 +29,44 @@
     const won = Math.round(fields.original.valueAsNumber * factor);
     fields.krw.value = Number.isSafeInteger(won) && won > 0 ? won : '';
   }
-  for (const field of [fields.original, fields.currency, fields.rate]) field.addEventListener('input', calculate);
+  const note = panel.querySelector('.rate-note');
+  const today = new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Seoul'}).format(new Date());
+  fields.spent_on.max = today;
+  let generation = 0;
+  async function lookupRate() {
+    const sequence = ++generation;
+    const currency = fields.currency.value.trim().toUpperCase();
+    const date = fields.spent_on.value;
+    fields.rate.value = '';
+    calculate();
+    note.textContent = '';
+    if (currency === 'KRW') return;
+    if (!date || date > today || !/^[A-Z]{3}$/.test(currency)) {
+      note.textContent = '결제일과 통화 코드를 확인하면 환율을 조회해요.';
+      return;
+    }
+    note.textContent = '결제일 기준 환율을 조회하고 있어요…';
+    try {
+      const response = await fetch('https://api.frankfurter.dev/v1/'+date+'?base='+currency+'&symbols=KRW',
+        {signal:AbortSignal.timeout(10000),referrerPolicy:'no-referrer'});
+      if (!response.ok) throw Error();
+      const quote = await response.json();
+      if (sequence !== generation) return;
+      if (quote.base !== currency || !/^\d{4}-\d{2}-\d{2}$/.test(quote.date) || quote.date > date ||
+          !Number.isFinite(quote.rates?.KRW) || quote.rates.KRW <= 0) throw Error();
+      fields.rate.value = quote.rates.KRW;
+      calculate();
+      note.textContent = quote.date + ' 기준환율 · Frankfurter' +
+        (quote.date === date ? '' : ' (결제일에 고시된 환율이 없어 이전 고시일 적용)');
+    } catch {
+      if (sequence === generation) note.textContent = '환율을 조회하지 못했어요. 환율 또는 실제 원화 결제액을 입력해 주세요.';
+    }
+  }
+  fields.spent_on.addEventListener('input',lookupRate);
+  fields.currency.addEventListener('input',lookupRate);
+  fields.original.addEventListener('input',calculate);
+  fields.rate.addEventListener('input',() => { generation++; calculate(); note.textContent='직접 입력한 환율'; });
+  fields.krw.addEventListener('input',() => { generation++; note.textContent='직접 입력한 원화 금액'; });
   review.addEventListener('submit', event => {
     event.preventDefault();
     form.elements.title.value = fields.merchant.value.trim();
@@ -40,6 +79,7 @@
     const photo = file.files[0];
     if (!photo) return;
     file.disabled = true;
+    generation++;
     review.hidden = true;
     review.reset();
     status.textContent = '영수증을 읽고 있어요…';
@@ -70,11 +110,12 @@
       const data = await res.json();
       if (!res.ok || !data.draft) throw Error(data.error || '인식하지 못했어요. 직접 입력하거나 다시 시도해 주세요.');
       const draft = data.draft;
-      fields.merchant.value = draft.merchant;
+      fields.merchant.value = [...new Set([draft.merchant_ko,draft.merchant].filter(Boolean))].join(' · ');
+      fields.spent_on.value = draft.spent_on || '';
       fields.category.value = draft.category;
       fields.original.value = draft.amount ?? '';
       fields.currency.value = draft.currency ?? '';
-      calculate();
+      lookupRate();
       status.textContent = ['읽은 내용을 확인해 주세요.', ...draft.warnings].join(' ');
       review.hidden = false;
     } catch (err) {
