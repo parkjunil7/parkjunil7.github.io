@@ -1,0 +1,6 @@
+.ai-receipt {margin: 1rem 0; padding: .85rem 1rem; border: 1px solid #b9d4de; border-radius: 12px;}
+.ai-receipt summary {cursor:pointer; font-weight:700;}
+.ai-receipt p {line-height:1.5;}
+.ai-receipt .receipt-review {display:grid; gap:.7rem;}
+.ai-receipt [hidden] {display:none!important;}
+.ai-receipt input {max-width:100%; min-width:0;}

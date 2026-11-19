@@ -45,6 +45,7 @@
     if (profile.error) throw profile.error;
     window.travelPage = { client, session, details, loginAlias: profile.data.login_alias };
     await loadScript("script.js?v=jjtg-20261119");
+    if (document.querySelector("#budget-form")) await loadScript("/assets/travel-receipt.js");
     if (document.querySelector("#world-map")) await loadScript("assets/archive.js");
     document.documentElement.classList.remove("auth-pending");
   }
