@@ -44,7 +44,7 @@
       .eq("user_id", session.user.id).single();
     if (profile.error) throw profile.error;
     window.travelPage = { client, session, details, loginAlias: profile.data.login_alias };
-    await loadScript("script.js?v=members-1");
+    await loadScript("script.js?v=jjtg-20261119");
     if (document.querySelector("#world-map")) await loadScript("assets/archive.js");
     document.documentElement.classList.remove("auth-pending");
   }
