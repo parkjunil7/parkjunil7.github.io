@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" type="image/png" sizes="32x32" href="../assets/icons/cat-flight-32.png?v=3">
+  <link rel="icon" type="image/png" sizes="64x64" href="../assets/icons/cat-flight-64.png?v=3">
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png?v=cat-flight-2">
+  <link rel="manifest" href="/site.webmanifest?v=travel-name">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="떠나보자">
+  <meta name="theme-color" content="#58b7ed">
+  <title>떠나보자 삿포로 | 홈/개요</title>
+  <script>
+    (function () {
+      const nextPath = window.location.pathname.split("/").pop() || "index.html";
+      const projectRef = "wphdhiowhivefokivfql";
+      const authKeys = [`sb-${projectRef}-auth-token`, "supabase.auth.token"];
+      let hasSession = false;
+
+      try {
+        hasSession = authKeys.some((key) => {
+          const value = window.localStorage.getItem(key);
+          return typeof value === "string" && value.length > 0 && value !== "null";
+        });
+      } catch (_error) {
+        hasSession = false;
+      }
+
+      if (!hasSession) {
+        window.location.replace(`login.html?next=${encodeURIComponent(nextPath)}`);
+      }
+    })();
+  </script>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body data-page="home">
+  <div class="site-shell">
+    <header class="topbar">
+      <a class="brand" href="index.html">
+        <span class="brand-mark" aria-hidden="true"><img src="../assets/icons/cat-flight-64.png" alt=""></span>
+        <span>
+          <strong>떠나보자</strong>
+          <small><span data-member-text="budgetText3"></span></small>
+        </span>
+      </a>
+      <nav class="nav">
+        <a href="../index.html">세계지도</a>
+        <a href="index.html">홈/개요</a>
+        <a href="schedule.html">여행 일정표</a>
+        <a href="records.html">여행 기록</a>
+        <a href="details.html">체크리스트</a>
+        <a href="budget.html">지출</a>
+      </nav>
+    </header>
+
+    <main>
+      <section class="hero scenic-hero sapporo-hero">
+        <div class="hero-copy">
+          <p class="eyebrow"><span data-member-text="indexText4"></span></p>
+          <h1><span data-member-text="indexText5"></span><br><span data-member-text="indexText6"></span></h1>
+          <p class="hero-text"><span data-member-text="indexText7"></span><br>함께 채워갈 5박 6일의 겨울 여행.</p>
+          <div class="hero-dday"><span class="hero-dday-label">D-Day</span><strong id="home-dday-value">—</strong></div>
+          <div class="hero-actions"><a class="button primary" href="schedule.html">일정 계획하기</a><a class="button secondary" href="details.html">준비물 확인</a></div>
+          <div class="hero-pills"><span class="pill">Sapporo</span><span class="pill">5박 6일</span><span class="pill"><span data-member-text="indexText8"></span></span></div>
+        </div>
+        <div class="winter-scene" role="img" aria-label="눈 내리는 삿포로의 겨울밤을 표현한 일러스트">
+          <span class="winter-moon"></span><div class="winter-snow">✦ · ˚ · ✧<br>· ˚ ✦ · ˚<br>˚ · ✧ · ✦</div>
+          <div class="winter-skyline"><i></i><i></i><i></i><i></i><i></i></div>
+          <div class="winter-caption"><span>OUR WINTER JOURNEY</span><strong>SAPPORO</strong><small><span data-member-text="indexText9"></span></small></div>
+        </div>
+      </section>
+      <section class="overview-strip">
+        <article class="overview-card"><span class="label">여행 기간</span><strong><span data-member-text="indexText10"></span></strong></article>
+        <article class="overview-card"><span class="label">여행지</span><strong>일본 · 홋카이도 · 삿포로</strong></article>
+        <article class="overview-card"><span class="label">여행 준비</span><strong>왕복 항공 예약 완료 · 숙소 및 세부 일정 미정</strong></article>
+      </section>
+      <section class="panel"><div class="panel-head"><p class="eyebrow">Six Winter Days</p><h2>5박 6일, 함께 채울 일정</h2></div><p class="muted">아직 정해지지 않은 일정은 비워두었어요. 여행 일정표에서 날짜별 계획을 추가하세요.</p><div class="feature-grid"><article class="feature-card"><span class="city-tag"><span data-member-text="indexText11"></span></span><h3>출국 · 삿포로 도착</h3><p>이스타항공 ZE623<br>인천 14:35 → 신치토세 17:05</p></article><article class="feature-card"><span class="city-tag"><span data-member-text="indexText12"></span></span><h3><span data-member-text="indexText13"></span></h3><p>세부 일정 미정</p></article><article class="feature-card"><span class="city-tag"><span data-member-text="indexText14"></span></span><h3>삿포로에서의 하루</h3><p>세부 일정 미정</p></article><article class="feature-card"><span class="city-tag"><span data-member-text="indexText15"></span></span><h3>삿포로에서의 하루</h3><p>세부 일정 미정</p></article><article class="feature-card"><span class="city-tag"><span data-member-text="indexText16"></span></span><h3>삿포로에서의 하루</h3><p>세부 일정 미정</p></article><article class="feature-card"><span class="city-tag"><span data-member-text="indexText17"></span></span><h3>귀국 · 인천 도착</h3><p>이스타항공 ZE628<br>신치토세 13:55 → 인천 17:10</p></article></div></section>
+      <section class="panel accent route-panel map-panel">
+        <div class="panel-head"><p class="eyebrow">Route Map</p><h2>이동 경로</h2></div>
+        <div id="travel-map" class="travel-map" aria-label="인천공항에서 신치토세공항을 거쳐 삿포로로 이어지는 여행 경로 지도"></div>
+        <p class="route-caption">인천공항 ↔ 신치토세공항 왕복 항공편 예약이 완료됐어요. 지도 선은 지점을 연결한 개략도이며, 공항과 삿포로 사이의 교통편은 미정입니다. 아래 시간은 각 공항의 현지 시간입니다.</p>
+        <div class="route-summary">
+          <article class="route-summary-card"><span class="route-summary-kind">가는 편 · 이스타항공 ZE623</span><strong>인천(ICN) → 신치토세(CTS)</strong><p><span data-member-text="indexText18"></span><br>소요 2시간 30분</p></article>
+          <article class="route-summary-card"><span class="route-summary-kind">오는 편 · 이스타항공 ZE628</span><strong>신치토세(CTS) → 인천(ICN)</strong><p><span data-member-text="indexText19"></span><br>소요 3시간 15분</p></article>
+          <article class="route-summary-card"><span class="route-summary-kind">현지 이동</span><strong>신치토세공항 → 삿포로</strong><p>교통편 · 이동 시간 미정</p></article>
+        </div>
+      </section>
+      <section class="panel"><div class="panel-head"><p class="eyebrow">Our Travel Notebook</p><h2>여행 준비부터 기록까지</h2></div><div class="feature-grid">
+        <a class="feature-card" href="schedule.html"><h3>여행 일정표</h3><p>날짜와 시간별로 우리 일정을 작성해요.</p></a>
+        <a class="feature-card" href="records.html"><h3>여행 기록</h3><p>일정에 사진과 추억을 남겨요.</p></a>
+        <a class="feature-card" href="details.html"><h3>체크리스트</h3><p>출발 전 준비할 일을 함께 확인해요.</p></a>
+        <a class="feature-card" href="budget.html"><h3>지출</h3><p>삿포로 여행 지출을 원화 기준으로 모아요.</p></a>
+      </div></section>
+    </main>
+  </div>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase-config.js"></script>
+  <script src="../assets/member-page.js" data-trip="sapporo"></script>
+</body>
+</html>

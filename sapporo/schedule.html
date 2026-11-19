@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" type="image/png" sizes="32x32" href="../assets/icons/cat-flight-32.png?v=3">
+  <link rel="icon" type="image/png" sizes="64x64" href="../assets/icons/cat-flight-64.png?v=3">
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png?v=cat-flight-2">
+  <link rel="manifest" href="/site.webmanifest?v=travel-name">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="떠나보자">
+  <meta name="theme-color" content="#58b7ed">
+  <title>떠나보자 삿포로 | 여행 일정표</title>
+  <script>
+    (function () {
+      const nextPath = window.location.pathname.split("/").pop() || "index.html";
+      const projectRef = "wphdhiowhivefokivfql";
+      const authKeys = [`sb-${projectRef}-auth-token`, "supabase.auth.token"];
+      let hasSession = false;
+
+      try {
+        hasSession = authKeys.some((key) => {
+          const value = window.localStorage.getItem(key);
+          return typeof value === "string" && value.length > 0 && value !== "null";
+        });
+      } catch (_error) {
+        hasSession = false;
+      }
+
+      if (!hasSession) {
+        window.location.replace(`login.html?next=${encodeURIComponent(nextPath)}`);
+      }
+    })();
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body data-page="schedule">
+  <div class="site-shell">
+    <header class="topbar">
+      <a class="brand" href="index.html">
+        <span class="brand-mark" aria-hidden="true"><img src="../assets/icons/cat-flight-64.png" alt=""></span>
+        <span>
+          <strong>떠나보자</strong>
+          <small><span data-member-text="budgetText3"></span></small>
+        </span>
+      </a>
+      <nav class="nav">
+        <a href="../index.html">세계지도</a>
+        <a href="index.html">홈/개요</a>
+        <a href="schedule.html">여행 일정표</a>
+        <a href="records.html">여행 기록</a>
+        <a href="details.html">체크리스트</a>
+        <a href="budget.html">지출</a>
+      </nav>
+    </header>
+
+    <main>
+      <section class="panel">
+        <div class="panel-head"><p class="eyebrow">Booked Flights</p><h2>예약된 왕복 항공편</h2></div>
+        <div class="route-summary">
+          <article class="route-summary-card"><span class="route-summary-kind">가는 편 · 이스타항공 ZE623</span><strong>인천(ICN) → 신치토세(CTS)</strong><p><span data-member-text="indexText18"></span></p></article>
+          <article class="route-summary-card"><span class="route-summary-kind">오는 편 · 이스타항공 ZE628</span><strong>신치토세(CTS) → 인천(ICN)</strong><p><span data-member-text="indexText19"></span></p></article>
+        </div>
+        <p class="muted">공항 현지 시간 기준 · 공항과 삿포로 사이의 교통편은 미정입니다.</p>
+      </section>
+
+      <section class="page-header">
+        <p class="eyebrow">Master Timeline</p>
+        <h1>여행 일정표</h1>
+        <p>날짜와 내용을 직접 등록하면 같은 링크를 보는 사람 모두가 같은 일정표를 실시간으로 확인할 수 있습니다.</p>
+      </section>
+
+      <section id="schedule-setup-notice" class="panel setup-notice is-hidden">
+        <div class="panel-head">
+          <p class="eyebrow">Supabase Setup</p>
+          <h2>일정표 테이블 생성 필요</h2>
+        </div>
+        <p class="setup-copy">
+          Supabase에 <code>itinerary_items</code> 테이블을 만든 뒤 다시 열면 공용 일정표 입력이 바로 동작합니다.
+        </p>
+      </section>
+
+      <section class="grid schedule-layout">
+        <article class="panel">
+          <div class="panel-head">
+            <p class="eyebrow">Add Timeline</p>
+            <h2>일정 등록</h2>
+          </div>
+          <form id="schedule-form" class="budget-form">
+            <input type="hidden" name="scheduleId">
+
+            <label class="form-field">
+              <span>날짜</span>
+              <input type="date" name="date" data-trip-range required>
+            </label>
+
+            <label class="form-field">
+              <span>시간</span>
+              <div class="time-range-fields">
+                <input type="text" name="startTime" inputmode="numeric" placeholder="07:45" required>
+                <span class="time-range-separator">~</span>
+                <input type="text" name="endTime" inputmode="numeric" placeholder="10:50" required>
+              </div>
+            </label>
+
+            <label class="form-field">
+              <span>제목</span>
+              <input type="text" name="title" placeholder="예: 출국 · 삿포로 도착" required>
+            </label>
+
+            <label class="form-field">
+              <span>내용</span>
+              <textarea name="items" rows="5" placeholder="한 줄에 하나씩 입력하세요&#10;예: 인천(ICN) 출발&#10;삿포로(CTS) 도착" required></textarea>
+            </label>
+
+            <div class="schedule-form-actions">
+              <button type="submit" class="button primary budget-submit">일정 추가</button>
+              <button type="button" id="schedule-cancel-edit" class="button secondary budget-reset is-hidden">수정 취소</button>
+            </div>
+          </form>
+        </article>
+      </section>
+
+      <section class="panel schedule-toolbar">
+        <div>
+          <p class="eyebrow">Manage Timeline</p>
+          <h2>등록된 일정 관리</h2>
+        </div>
+        <button type="button" id="schedule-reset" class="button secondary budget-reset">전체 초기화</button>
+      </section>
+
+      <section id="schedule-list" class="timeline"></section>
+
+      <section class="panel schedule-board-panel">
+        <div class="panel-head">
+          <p class="eyebrow">Visual Timetable</p>
+          <h2>시간표 보기</h2>
+        </div>
+        <div id="schedule-board" class="schedule-board"></div>
+      </section>
+    </main>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase-config.js"></script>
+  <script src="../assets/member-page.js" data-trip="sapporo"></script>
+</body>
+</html>

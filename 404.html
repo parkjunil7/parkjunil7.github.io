@@ -1,0 +1,11 @@
+<!doctype html>
+<html lang="ko">
+<meta charset="utf-8">
+<title>페이지를 찾을 수 없습니다 | 떠나보자</title>
+<p>페이지를 찾을 수 없습니다. <a href="/">여행 홈으로</a></p>
+<script>
+  // Keep previously bookmarked trip pages working after their paths changed.
+  const match = location.pathname.match(/^\/(china|gangneung|jeju|sapporo)-\d{4}\/(index|login|schedule|details|records|budget)?(?:\.html)?$/);
+  if (match) location.replace("/" + match[1] + "/" + (match[2] || "index") + ".html" + location.search + location.hash);
+</script>
+</html>

@@ -1,0 +1,25 @@
+{
+  "id": "./",
+  "name": "떠나보자",
+  "short_name": "떠나보자",
+  "lang": "ko",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#58b7ed",
+  "theme_color": "#58b7ed",
+  "icons": [
+    {
+      "src": "assets/icons/cat-flight-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "assets/icons/cat-flight-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}
